@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { CSSProperties, PointerEvent, ReactNode, RefObject } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   ArrowUpRight,
   BarChart3,
@@ -18,8 +18,7 @@ import {
   Zap,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { loadGsapScrollTrigger, shouldRunDepthMotion, shouldRunScrollMotion } from "@/lib/client-performance";
 import { trackEvent } from "@/lib/analytics";
 
 const premiumEase = [0.16, 1, 0.3, 1] as const;
@@ -148,28 +147,6 @@ function ProjectButton({
   projectId: Project["id"];
   action: string;
 }) {
-  const ref = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
-
-  const onPointerMove = (event: PointerEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-    const element = ref.current;
-    if (!element) return;
-
-    const rect = element.getBoundingClientRect();
-    const x = event.clientX - rect.left - rect.width / 2;
-    const y = event.clientY - rect.top - rect.height / 2;
-
-    element.style.setProperty("--magnet-x", `${x * 0.16}px`);
-    element.style.setProperty("--magnet-y", `${y * 0.22}px`);
-  };
-
-  const onPointerLeave = () => {
-    const element = ref.current;
-    if (!element) return;
-
-    element.style.setProperty("--magnet-x", "0px");
-    element.style.setProperty("--magnet-y", "0px");
-  };
-
   const className =
     variant === "primary"
       ? "project-button magnetic-button group relative inline-flex min-h-12 items-center justify-center overflow-hidden rounded-full bg-pearl px-5 text-sm font-bold text-ink shadow-[0_0_42px_rgba(248,251,255,0.14)] transition duration-500 hover:shadow-[0_0_70px_rgba(97,244,255,0.24)]"
@@ -191,13 +168,10 @@ function ProjectButton({
   if (href) {
     return (
       <a
-        ref={ref as RefObject<HTMLAnchorElement>}
         href={href}
         target={href.startsWith("http") ? "_blank" : undefined}
         rel={href.startsWith("http") ? "noreferrer" : undefined}
         className={className}
-        onPointerMove={onPointerMove}
-        onPointerLeave={onPointerLeave}
         onClick={() => trackEvent("project_click", { project: projectId, action })}
       >
         {content}
@@ -207,11 +181,8 @@ function ProjectButton({
 
   return (
     <button
-      ref={ref as RefObject<HTMLButtonElement>}
       type="button"
       className={className}
-      onPointerMove={onPointerMove}
-      onPointerLeave={onPointerLeave}
       onClick={() => trackEvent("project_click", { project: projectId, action })}
     >
       {content}
@@ -391,45 +362,16 @@ function ProjectVisual({ project }: { project: Project }) {
 }
 
 function ProjectCase({ project, index }: { project: Project; index: number }) {
-  const ref = useRef<HTMLElement | null>(null);
-
-  const onPointerMove = (event: PointerEvent<HTMLElement>) => {
-    const element = ref.current;
-    if (!element) return;
-
-    const rect = element.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
-
-    element.style.setProperty("--case-x", `${x * 100}%`);
-    element.style.setProperty("--case-y", `${y * 100}%`);
-    element.style.setProperty("--case-tilt-x", `${(y - 0.5) * -4}deg`);
-    element.style.setProperty("--case-tilt-y", `${(x - 0.5) * 4}deg`);
-  };
-
-  const onPointerLeave = () => {
-    const element = ref.current;
-    if (!element) return;
-
-    element.style.setProperty("--case-x", "50%");
-    element.style.setProperty("--case-y", "50%");
-    element.style.setProperty("--case-tilt-x", "0deg");
-    element.style.setProperty("--case-tilt-y", "0deg");
-  };
-
   return (
     <article
-      ref={ref}
       className={`project-case ${project.reverse ? "project-case-reverse" : ""} relative grid min-h-[720px] items-center gap-10 overflow-hidden rounded-[2.25rem] border border-white/10 bg-white/[0.035] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_30px_120px_rgba(0,0,0,0.36)] backdrop-blur-2xl sm:p-7 lg:grid-cols-2 lg:p-10`}
-      onPointerMove={onPointerMove}
-      onPointerLeave={onPointerLeave}
     >
       <div aria-hidden="true" className="project-case-light" />
 
       <motion.div
         className={`project-visual order-1 ${project.reverse ? "lg:order-2" : "lg:order-1"}`}
-        initial={{ opacity: 0, y: 42, filter: "blur(14px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        initial={{ opacity: 0, y: 42 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-110px" }}
         transition={{ delay: 0.1, duration: 0.95, ease: premiumEase }}
       >
@@ -438,8 +380,8 @@ function ProjectCase({ project, index }: { project: Project; index: number }) {
 
       <motion.div
         className={`project-copy order-2 relative z-10 ${project.reverse ? "lg:order-1" : "lg:order-2"}`}
-        initial={{ opacity: 0, y: 32, filter: "blur(12px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        initial={{ opacity: 0, y: 32 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-110px" }}
         transition={{ delay: 0.18, duration: 0.9, ease: premiumEase }}
       >
@@ -521,18 +463,26 @@ export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    if (!shouldRunScrollMotion()) return;
 
-    const context = gsap.context(() => {
+    const runDepthMotion = shouldRunDepthMotion();
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
+
+    const setupMotion = async () => {
+      const { gsap } = await loadGsapScrollTrigger();
+
+      if (cancelled) return;
+
+      const context = gsap.context(() => {
       const headerItems = gsap.utils.toArray<HTMLElement>(".projects-header-reveal");
 
       gsap.fromTo(
         headerItems,
-        { y: 42, opacity: 0, filter: "blur(14px)" },
+        { y: 42, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          filter: "blur(0px)",
           duration: 1,
           ease: "power3.out",
           stagger: 0.1,
@@ -561,32 +511,42 @@ export function ProjectsSection() {
         );
       });
 
-      gsap.utils.toArray<HTMLElement>(".project-depth").forEach((depthElement) => {
-        gsap.to(depthElement, {
-          yPercent: -8,
+      if (runDepthMotion) {
+        gsap.utils.toArray<HTMLElement>(".project-depth").forEach((depthElement) => {
+          gsap.to(depthElement, {
+            yPercent: -8,
+            ease: "none",
+            scrollTrigger: {
+              trigger: depthElement.closest(".project-case"),
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.85,
+            },
+          });
+        });
+
+        gsap.to(".projects-bg-shift", {
+          yPercent: -18,
           ease: "none",
           scrollTrigger: {
-            trigger: depthElement.closest(".project-case"),
+            trigger: sectionRef.current,
             start: "top bottom",
             end: "bottom top",
-            scrub: 0.85,
+            scrub: 0.9,
           },
         });
-      });
+      }
+      }, sectionRef);
 
-      gsap.to(".projects-bg-shift", {
-        yPercent: -18,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.9,
-        },
-      });
-    }, sectionRef);
+      cleanup = () => context.revert();
+    };
 
-    return () => context.revert();
+    void setupMotion();
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return (

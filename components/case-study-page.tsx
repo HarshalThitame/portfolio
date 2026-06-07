@@ -25,6 +25,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { CaseStudy } from "@/lib/case-studies";
 import { getNextCaseStudy } from "@/lib/case-studies";
 import { trackEvent } from "@/lib/analytics";
+import {
+  getClientPerformanceTier,
+  loadGsapScrollTrigger,
+  shouldRunDepthMotion,
+  shouldRunScrollMotion,
+} from "@/lib/client-performance";
 
 const premiumEase = [0.16, 1, 0.3, 1] as const;
 
@@ -208,8 +214,8 @@ function OverviewSection({ project }: { project: CaseStudy }) {
       <div className="case-overview-grid">
         <motion.article
           className="case-story-card case-reveal lg:col-span-2"
-          initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-90px" }}
           transition={{ duration: 0.78, ease: premiumEase }}
         >
@@ -224,8 +230,8 @@ function OverviewSection({ project }: { project: CaseStudy }) {
             <motion.article
               key={item.label}
               className="case-info-card case-reveal"
-              initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-90px" }}
               transition={{ delay: index * 0.04, duration: 0.7, ease: premiumEase }}
             >
@@ -263,8 +269,8 @@ function StorySection({
             <motion.article
               key={item.title}
               className="case-story-step"
-              initial={{ opacity: 0, x: 28, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, x: 28 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-90px" }}
               transition={{ delay: index * 0.06, duration: 0.72, ease: premiumEase }}
             >
@@ -290,8 +296,8 @@ function FeatureShowcase({ project }: { project: CaseStudy }) {
           <motion.article
             key={feature.title}
             className={`case-feature-row ${index % 2 ? "case-feature-reverse" : ""}`}
-            initial={{ opacity: 0, y: 44, filter: "blur(14px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 44 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-120px" }}
             transition={{ duration: 0.82, ease: premiumEase }}
           >
@@ -324,8 +330,8 @@ function GallerySection({ project }: { project: CaseStudy }) {
             type="button"
             className="case-gallery-card"
             onClick={() => setSelectedIndex(index)}
-            initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-90px" }}
             transition={{ delay: index * 0.05, duration: 0.74, ease: premiumEase }}
           >
@@ -352,9 +358,9 @@ function GallerySection({ project }: { project: CaseStudy }) {
           >
             <motion.div
               className="case-lightbox-panel"
-              initial={{ y: 28, scale: 0.96, filter: "blur(12px)" }}
-              animate={{ y: 0, scale: 1, filter: "blur(0px)" }}
-              exit={{ y: 20, scale: 0.96, filter: "blur(12px)" }}
+              initial={{ y: 28, scale: 0.96 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 20, scale: 0.96 }}
               transition={{ duration: 0.48, ease: premiumEase }}
               onClick={(event) => event.stopPropagation()}
             >
@@ -407,8 +413,8 @@ function StackSection({ project }: { project: CaseStudy }) {
               <motion.article
                 key={item}
                 className="case-stack-card"
-                initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-90px" }}
                 transition={{ delay: index * 0.05, duration: 0.68, ease: premiumEase }}
               >
@@ -436,8 +442,8 @@ function ProcessSection({ project }: { project: CaseStudy }) {
           <motion.article
             key={step.phase}
             className="case-process-step"
-            initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ delay: index * 0.05, duration: 0.7, ease: premiumEase }}
           >
@@ -460,8 +466,8 @@ function ResultsSection({ project }: { project: CaseStudy }) {
           <motion.article
             key={result.label}
             className="case-result-card"
-            initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-90px" }}
             transition={{ delay: index * 0.06, duration: 0.72, ease: premiumEase }}
             whileHover={{ y: -5 }}
@@ -488,27 +494,30 @@ export function CaseStudyPage({ project }: { project: CaseStudy }) {
   }, [project.name, project.slug]);
 
   useEffect(() => {
+    if (!shouldRunScrollMotion()) return;
+
     let cancelled = false;
     let context: { revert: () => void } | undefined;
+    let delayTimer = 0;
+    let idleHandle = 0;
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
 
     const setupCaseMotion = async () => {
-      const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
-        import("gsap"),
-        import("gsap/ScrollTrigger"),
-      ]);
+      const runDepthMotion = shouldRunDepthMotion();
+      const { gsap } = await loadGsapScrollTrigger();
 
       if (cancelled) return;
-
-      gsap.registerPlugin(ScrollTrigger);
 
       context = gsap.context(() => {
         gsap.fromTo(
           ".case-reveal",
-          { y: 38, opacity: 0, filter: "blur(14px)" },
+          { y: 38, opacity: 0 },
           {
             y: 0,
             opacity: 1,
-            filter: "blur(0px)",
             duration: 0.95,
             ease: "power3.out",
             stagger: 0.08,
@@ -519,18 +528,20 @@ export function CaseStudyPage({ project }: { project: CaseStudy }) {
           },
         );
 
-        gsap.utils.toArray<HTMLElement>(".case-depth").forEach((element) => {
-          gsap.to(element, {
-            yPercent: -7,
-            ease: "none",
-            scrollTrigger: {
-              trigger: element,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 0.9,
-            },
+        if (runDepthMotion) {
+          gsap.utils.toArray<HTMLElement>(".case-depth").forEach((element) => {
+            gsap.to(element, {
+              yPercent: -7,
+              ease: "none",
+              scrollTrigger: {
+                trigger: element,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 0.9,
+              },
+            });
           });
-        });
+        }
 
         gsap.fromTo(
           ".case-process-progress",
@@ -549,10 +560,20 @@ export function CaseStudyPage({ project }: { project: CaseStudy }) {
       }, pageRef);
     };
 
-    void setupCaseMotion();
+    const delay = getClientPerformanceTier() === "full" ? 1200 : 2200;
+    delayTimer = window.setTimeout(() => {
+      if (idleWindow.requestIdleCallback) {
+        idleHandle = idleWindow.requestIdleCallback(() => void setupCaseMotion(), { timeout: 1800 });
+        return;
+      }
+
+      void setupCaseMotion();
+    }, delay);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(delayTimer);
+      if (idleHandle && idleWindow.cancelIdleCallback) idleWindow.cancelIdleCallback(idleHandle);
       context?.revert();
     };
   }, []);
@@ -604,32 +625,32 @@ export function CaseStudyPage({ project }: { project: CaseStudy }) {
             </motion.a>
             <motion.p
               className="case-kicker"
-              initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12, duration: 0.75, ease: premiumEase }}
             >
               {project.category}
             </motion.p>
             <motion.h1
               className="font-display text-[4.2rem] font-black uppercase leading-[0.82] tracking-normal text-white min-[390px]:text-[5rem] sm:text-[7rem] lg:text-[8.6rem] xl:text-[10rem]"
-              initial={{ opacity: 0, y: 34, filter: "blur(16px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 34 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.95, ease: premiumEase }}
             >
               {project.name}
             </motion.h1>
             <motion.p
               className="mt-7 max-w-2xl text-xl font-semibold leading-9 text-white/82 sm:text-2xl"
-              initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.34, duration: 0.82, ease: premiumEase }}
             >
               {project.tagline}
             </motion.p>
             <motion.p
               className="mt-5 max-w-2xl text-base leading-8 text-frost/70 sm:text-lg"
-              initial={{ opacity: 0, y: 22, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.44, duration: 0.82, ease: premiumEase }}
             >
               {project.description}
@@ -669,8 +690,8 @@ export function CaseStudyPage({ project }: { project: CaseStudy }) {
 
           <motion.div
             className="case-depth"
-            initial={{ opacity: 0, y: 42, scale: 0.96, filter: "blur(18px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 42, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.3, duration: 1, ease: premiumEase }}
           >
             <ProductMockup project={project} visual={project.slug === "flux3d" ? "lead" : "dashboard"} large />
@@ -690,8 +711,8 @@ export function CaseStudyPage({ project }: { project: CaseStudy }) {
           <section className="case-section">
             <motion.article
               className="case-testimonial"
-              initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-90px" }}
               transition={{ duration: 0.82, ease: premiumEase }}
             >

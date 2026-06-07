@@ -4,6 +4,30 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { SectionSkeleton } from "@/components/skeletons";
+import { getClientPerformanceTier } from "@/lib/client-performance";
+
+type IdleWindow = Window & {
+  requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
+
+const hydrationDelays: Record<string, number> = {
+  about: 320,
+  "featured-projects": 1100,
+  services: 1900,
+  "client-acquisition": 2800,
+  consultation: 3700,
+  "personal-brand": 4600,
+  labs: 5600,
+  contact: 6600,
+};
+
+function getHydrationDelay(sectionId: string) {
+  const tier = getClientPerformanceTier();
+  const multiplier = tier === "full" ? 1 : tier === "balanced" ? 1.45 : 2.1;
+
+  return Math.round((hydrationDelays[sectionId] ?? 1800) * multiplier);
+}
 
 const AboutSection = dynamic(
   () => import("@/components/about-section").then((module) => module.AboutSection),
@@ -58,23 +82,51 @@ function DeferredSection({
     const node = ref.current;
     if (!node) return;
 
-    if (!("IntersectionObserver" in window)) {
+    const idleWindow = window as IdleWindow;
+    let delayTimer = 0;
+    let idleHandle = 0;
+    let rendered = false;
+
+    const renderSection = (activeObserver?: IntersectionObserver) => {
+      if (rendered) return;
+      rendered = true;
       setShouldRender(true);
-      return;
+      activeObserver?.disconnect();
+    };
+
+    if (typeof IntersectionObserver === "undefined") {
+      const delay = window.setTimeout(() => renderSection(), getHydrationDelay(sectionId));
+
+      return () => window.clearTimeout(delay);
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry?.isIntersecting) return;
-        setShouldRender(true);
-        observer.disconnect();
+        renderSection(observer);
       },
-      { rootMargin: "0px 0px -18% 0px" },
+      { rootMargin: "900px 0px 700px 0px" },
     );
 
     observer.observe(node);
-    return () => observer.disconnect();
-  }, [shouldRender]);
+
+    delayTimer = window.setTimeout(() => {
+      if (rendered) return;
+
+      if (idleWindow.requestIdleCallback) {
+        idleHandle = idleWindow.requestIdleCallback(() => renderSection(), { timeout: 1600 });
+        return;
+      }
+
+      renderSection();
+    }, getHydrationDelay(sectionId));
+
+    return () => {
+      observer?.disconnect();
+      window.clearTimeout(delayTimer);
+      if (idleHandle && idleWindow.cancelIdleCallback) idleWindow.cancelIdleCallback(idleHandle);
+    };
+  }, [sectionId, shouldRender]);
 
   return (
     <div

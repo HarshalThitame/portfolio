@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { ComponentType, CSSProperties, PointerEvent } from "react";
 import {
   Bot,
@@ -20,8 +20,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { loadGsapScrollTrigger, shouldRunDepthMotion, shouldRunScrollMotion } from "@/lib/client-performance";
 
 const premiumEase = [0.16, 1, 0.3, 1] as const;
 
@@ -107,8 +106,8 @@ const aboutParticles = [
 
 function CountUpStat({ value, suffix, label }: (typeof stats)[number]) {
   const ref = useRef<HTMLDivElement | null>(null);
+  const valueRef = useRef<HTMLSpanElement | null>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const [displayValue, setDisplayValue] = useState(typeof value === "number" ? 0 : value);
 
   useEffect(() => {
     if (!inView || typeof value !== "number") return;
@@ -120,7 +119,7 @@ function CountUpStat({ value, suffix, label }: (typeof stats)[number]) {
     const tick = (now: number) => {
       const progress = Math.min((now - startedAt) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 4);
-      setDisplayValue(Math.round(value * eased));
+      if (valueRef.current) valueRef.current.textContent = String(Math.round(value * eased));
 
       if (progress < 1) {
         frame = requestAnimationFrame(tick);
@@ -136,15 +135,15 @@ function CountUpStat({ value, suffix, label }: (typeof stats)[number]) {
     <motion.div
       ref={ref}
       className="premium-stat about-card group relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-white/[0.045] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_24px_80px_rgba(0,0,0,0.26)] backdrop-blur-2xl transition duration-500 hover:-translate-y-1 hover:border-cyanflare/35 hover:bg-white/[0.07] sm:p-7"
-      initial={{ opacity: 0, y: 26, filter: "blur(12px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 26 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.82, ease: premiumEase }}
     >
       <div aria-hidden="true" className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-60" />
       <div className="relative z-10">
         <p className="font-display text-4xl font-black leading-none text-white sm:text-5xl">
-          {displayValue}
+          <span ref={valueRef}>{typeof value === "number" ? 0 : value}</span>
           {suffix}
         </p>
         <p className="mt-4 max-w-44 text-sm font-medium leading-6 text-frost/70">{label}</p>
@@ -210,72 +209,90 @@ export function AboutSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    if (!shouldRunScrollMotion()) return;
 
-    const context = gsap.context(() => {
-      const revealElements = gsap.utils.toArray<HTMLElement>(".about-reveal");
+    const runDepthMotion = shouldRunDepthMotion();
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
 
-      gsap.set(revealElements, { y: 34, opacity: 0, filter: "blur(12px)" });
+    const setupMotion = async () => {
+      const { gsap, ScrollTrigger } = await loadGsapScrollTrigger();
 
-      ScrollTrigger.batch(revealElements, {
-        start: "top 82%",
-        once: true,
-        onEnter: (batch) => {
-          gsap.to(batch, {
+      if (cancelled) return;
+
+      const context = gsap.context(() => {
+        const revealElements = gsap.utils.toArray<HTMLElement>(".about-reveal");
+
+        gsap.set(revealElements, { y: 34, opacity: 0 });
+
+        ScrollTrigger.batch(revealElements, {
+          start: "top 82%",
+          once: true,
+          onEnter: (batch) => {
+            gsap.to(batch, {
+              y: 0,
+              opacity: 1,
+              duration: 0.95,
+              ease: "power3.out",
+              stagger: 0.08,
+            });
+          },
+        });
+
+        gsap.fromTo(
+          ".about-intro-line",
+          { scaleX: 0 },
+          {
+            scaleX: 1,
+            transformOrigin: "left center",
             y: 0,
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.95,
+            duration: 1.15,
             ease: "power3.out",
-            stagger: 0.08,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 74%",
+            },
+          },
+        );
+
+        if (runDepthMotion) {
+          gsap.to(".about-parallax", {
+            yPercent: -12,
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.8,
+            },
           });
-        },
-      });
+        }
 
-      gsap.fromTo(
-        ".about-intro-line",
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          transformOrigin: "left center",
-          y: 0,
-          duration: 1.15,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 74%",
+        gsap.fromTo(
+          ".timeline-progress",
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".journey-timeline",
+              start: "top 72%",
+              end: "bottom 58%",
+              scrub: 0.7,
+            },
           },
-        },
-      );
+        );
+      }, sectionRef);
 
-      gsap.to(".about-parallax", {
-        yPercent: -12,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.8,
-        },
-      });
+      cleanup = () => context.revert();
+    };
 
-      gsap.fromTo(
-        ".timeline-progress",
-        { scaleY: 0 },
-        {
-          scaleY: 1,
-          ease: "none",
-          scrollTrigger: {
-            trigger: ".journey-timeline",
-            start: "top 72%",
-            end: "bottom 58%",
-            scrub: 0.7,
-          },
-        },
-      );
-    }, sectionRef);
+    void setupMotion();
 
-    return () => context.revert();
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return (
@@ -412,8 +429,8 @@ export function AboutSection() {
                 <motion.article
                   key={item.title}
                   className="approach-card group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.045] p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
-                  initial={{ opacity: 0, y: 28, filter: "blur(12px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-90px" }}
                   transition={{ delay: index * 0.08, duration: 0.78, ease: premiumEase }}
                   whileHover={{ y: -6 }}
@@ -449,8 +466,8 @@ export function AboutSection() {
                 <motion.div
                   key={milestone}
                   className="relative pl-12"
-                  initial={{ opacity: 0, x: 24, filter: "blur(10px)" }}
-                  whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, x: 24 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-80px" }}
                   transition={{ delay: index * 0.08, duration: 0.72, ease: premiumEase }}
                 >

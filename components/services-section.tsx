@@ -21,8 +21,7 @@ import {
   Zap,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { loadGsapScrollTrigger, shouldRunDepthMotion, shouldRunScrollMotion } from "@/lib/client-performance";
 
 const premiumEase = [0.16, 1, 0.3, 1] as const;
 
@@ -357,8 +356,8 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
         element.style.setProperty("--service-x", "50%");
         element.style.setProperty("--service-y", "50%");
       }}
-      initial={{ opacity: 0, y: 40, filter: "blur(14px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-110px" }}
       transition={{ delay: index * 0.06, duration: 0.88, ease: premiumEase }}
       whileHover={{ y: -6, scale: 1.006 }}
@@ -404,16 +403,24 @@ export function ServicesSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    if (!shouldRunScrollMotion()) return;
 
-    const context = gsap.context(() => {
+    const runDepthMotion = shouldRunDepthMotion();
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
+
+    const setupMotion = async () => {
+      const { gsap } = await loadGsapScrollTrigger();
+
+      if (cancelled) return;
+
+      const context = gsap.context(() => {
       gsap.fromTo(
         ".services-header-reveal",
-        { y: 42, opacity: 0, filter: "blur(14px)" },
+        { y: 42, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          filter: "blur(0px)",
           duration: 1,
           ease: "power3.out",
           stagger: 0.1,
@@ -424,29 +431,31 @@ export function ServicesSection() {
         },
       );
 
-      gsap.to(".services-bg-shift", {
-        yPercent: -16,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.9,
-        },
-      });
-
-      gsap.utils.toArray<HTMLElement>(".service-depth").forEach((element) => {
-        gsap.to(element, {
-          yPercent: -7,
+      if (runDepthMotion) {
+        gsap.to(".services-bg-shift", {
+          yPercent: -16,
           ease: "none",
           scrollTrigger: {
-            trigger: element.closest(".service-bento-card"),
+            trigger: sectionRef.current,
             start: "top bottom",
             end: "bottom top",
-            scrub: 0.8,
+            scrub: 0.9,
           },
         });
-      });
+
+        gsap.utils.toArray<HTMLElement>(".service-depth").forEach((element) => {
+          gsap.to(element, {
+            yPercent: -7,
+            ease: "none",
+            scrollTrigger: {
+              trigger: element.closest(".service-bento-card"),
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.8,
+            },
+          });
+        });
+      }
 
       gsap.fromTo(
         ".process-progress",
@@ -462,9 +471,17 @@ export function ServicesSection() {
           },
         },
       );
-    }, sectionRef);
+      }, sectionRef);
 
-    return () => context.revert();
+      cleanup = () => context.revert();
+    };
+
+    void setupMotion();
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return (
@@ -551,8 +568,8 @@ export function ServicesSection() {
                 <motion.article
                   key={value.title}
                   className="value-card group relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.045] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_22px_80px_rgba(0,0,0,0.3)] backdrop-blur-2xl"
-                  initial={{ opacity: 0, y: 28, filter: "blur(12px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-90px" }}
                   transition={{ delay: index * 0.07, duration: 0.78, ease: premiumEase }}
                   whileHover={{ y: -5 }}
@@ -595,8 +612,8 @@ export function ServicesSection() {
                 <motion.div
                   key={item.step}
                   className="process-step relative z-10 rounded-[1.35rem] border border-white/10 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl"
-                  initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-80px" }}
                   transition={{ delay: index * 0.08, duration: 0.72, ease: premiumEase }}
                 >

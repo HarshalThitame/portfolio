@@ -4,27 +4,39 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Copy, Linkedin, Share2, Twitter } from "lucide-react";
 
 export function ReadingProgress() {
-  const [progress, setProgress] = useState(0);
+  const progressRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
+    let ticking = false;
+
     const update = () => {
       const scrollTop = window.scrollY;
       const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      setProgress(Math.min(1, Math.max(0, scrollTop / max)));
+      const progress = Math.min(1, Math.max(0, scrollTop / max));
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${progress})`;
+      }
+      ticking = false;
+    };
+
+    const scheduleUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(update);
     };
 
     update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
     return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
     };
   }, []);
 
   return (
     <div className="article-progress" aria-hidden="true">
-      <span style={{ transform: `scaleX(${progress})` }} />
+      <span ref={progressRef} />
     </div>
   );
 }

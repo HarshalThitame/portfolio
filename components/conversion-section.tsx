@@ -19,8 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { loadGsapScrollTrigger, shouldRunDepthMotion, shouldRunScrollMotion } from "@/lib/client-performance";
 import { trackEvent } from "@/lib/analytics";
 import { siteConfig } from "@/lib/site-config";
 
@@ -88,8 +87,8 @@ function ProofCard({
   return (
     <motion.article
       className="conversion-card relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-2xl"
-      initial={{ opacity: 0, y: 26, filter: "blur(10px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 26 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ delay: index * 0.06, duration: 0.72, ease: premiumEase }}
       whileHover={{ y: -5 }}
@@ -141,8 +140,8 @@ function IndustryCard({
         element.style.setProperty("--industry-x", "50%");
         element.style.setProperty("--industry-y", "50%");
       }}
-      initial={{ opacity: 0, y: 22, filter: "blur(10px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-90px" }}
       transition={{ delay: index * 0.045, duration: 0.7, ease: premiumEase }}
       whileHover={{ y: -4, scale: 1.01 }}
@@ -228,16 +227,24 @@ export function ConversionSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    if (!shouldRunScrollMotion()) return;
 
-    const context = gsap.context(() => {
+    const runDepthMotion = shouldRunDepthMotion();
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
+
+    const setupMotion = async () => {
+      const { gsap } = await loadGsapScrollTrigger();
+
+      if (cancelled) return;
+
+      const context = gsap.context(() => {
       gsap.fromTo(
         ".conversion-reveal",
-        { y: 42, opacity: 0, filter: "blur(14px)" },
+        { y: 42, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          filter: "blur(0px)",
           duration: 1,
           ease: "power3.out",
           stagger: 0.09,
@@ -248,19 +255,29 @@ export function ConversionSection() {
         },
       );
 
-      gsap.to(".conversion-bg-shift", {
-        yPercent: -14,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.9,
-        },
-      });
-    }, sectionRef);
+      if (runDepthMotion) {
+        gsap.to(".conversion-bg-shift", {
+          yPercent: -14,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.9,
+          },
+        });
+      }
+      }, sectionRef);
 
-    return () => context.revert();
+      cleanup = () => context.revert();
+    };
+
+    void setupMotion();
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return (
@@ -359,8 +376,8 @@ export function ConversionSection() {
         <div className="mt-24 grid gap-5 lg:grid-cols-[1fr_0.72fr]">
           <motion.article
             className="conversion-card relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_28px_100px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:p-8 lg:p-10"
-            initial={{ opacity: 0, y: 34, filter: "blur(12px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 34 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-90px" }}
             transition={{ duration: 0.85, ease: premiumEase }}
           >
@@ -403,8 +420,8 @@ export function ConversionSection() {
 
           <motion.aside
             className="conversion-card relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_28px_100px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:p-8"
-            initial={{ opacity: 0, y: 34, filter: "blur(12px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 34 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-90px" }}
             transition={{ delay: 0.08, duration: 0.85, ease: premiumEase }}
           >

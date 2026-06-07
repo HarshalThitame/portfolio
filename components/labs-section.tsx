@@ -110,8 +110,8 @@ function LabsExperience({ variant = "home" }: LabsExperienceProps) {
           <div>
             <motion.p
               className="labs-kicker"
-              initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.72, ease: premiumEase }}
             >
@@ -120,8 +120,8 @@ function LabsExperience({ variant = "home" }: LabsExperienceProps) {
             <motion.h2
               id="labs-heading"
               className="mt-6 font-display text-5xl font-black leading-[0.92] tracking-normal text-white sm:text-6xl md:text-7xl xl:text-8xl"
-              initial={{ opacity: 0, y: 32, filter: "blur(14px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ delay: 0.1, duration: 0.88, ease: premiumEase }}
             >
@@ -132,8 +132,8 @@ function LabsExperience({ variant = "home" }: LabsExperienceProps) {
 
           <motion.div
             className="labs-hero-copy"
-            initial={{ opacity: 0, y: 28, filter: "blur(12px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ delay: 0.16, duration: 0.78, ease: premiumEase }}
           >
@@ -164,8 +164,8 @@ function LabsExperience({ variant = "home" }: LabsExperienceProps) {
 
         <motion.div
           className="labs-command-center"
-          initial={{ opacity: 0, y: 34, filter: "blur(12px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 34 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ delay: 0.12, duration: 0.84, ease: premiumEase }}
         >
@@ -627,8 +627,8 @@ function LabCard({
   return (
     <motion.article
       className={`lab-card ${active ? "active" : ""}`}
-      initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ delay: index * 0.05, duration: 0.72, ease: premiumEase }}
       whileHover={{ y: -6 }}

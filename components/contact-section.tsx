@@ -19,8 +19,7 @@ import {
   Twitter,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { loadGsapScrollTrigger, shouldRunDepthMotion, shouldRunScrollMotion } from "@/lib/client-performance";
 import { trackEvent } from "@/lib/analytics";
 import { siteConfig } from "@/lib/site-config";
 
@@ -196,8 +195,8 @@ function ContactCard({ method, index }: { method: ContactMethod; index: number }
           trackEvent(method.analyticsEvent, { source: "contact_card", label: method.title });
         }
       }}
-      initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-90px" }}
       transition={{ delay: index * 0.05, duration: 0.7, ease: premiumEase }}
     >
@@ -256,16 +255,24 @@ export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    if (!shouldRunScrollMotion()) return;
 
-    const context = gsap.context(() => {
+    const runDepthMotion = shouldRunDepthMotion();
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
+
+    const setupMotion = async () => {
+      const { gsap } = await loadGsapScrollTrigger();
+
+      if (cancelled) return;
+
+      const context = gsap.context(() => {
       gsap.fromTo(
         ".contact-reveal",
-        { y: 44, opacity: 0, filter: "blur(14px)" },
+        { y: 44, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          filter: "blur(0px)",
           duration: 1,
           ease: "power3.out",
           stagger: 0.1,
@@ -276,24 +283,25 @@ export function ContactSection() {
         },
       );
 
-      gsap.to(".contact-bg-shift", {
-        yPercent: -16,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.9,
-        },
-      });
+      if (runDepthMotion) {
+        gsap.to(".contact-bg-shift", {
+          yPercent: -16,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.9,
+          },
+        });
+      }
 
       gsap.fromTo(
         ".trust-pill",
-        { y: 20, opacity: 0, filter: "blur(8px)" },
+        { y: 20, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          filter: "blur(0px)",
           duration: 0.72,
           ease: "power3.out",
           stagger: 0.07,
@@ -319,9 +327,17 @@ export function ContactSection() {
           },
         },
       );
-    }, sectionRef);
+      }, sectionRef);
 
-    return () => context.revert();
+      cleanup = () => context.revert();
+    };
+
+    void setupMotion();
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   const handlePointerMove = (event: PointerEvent<HTMLElement>) => {

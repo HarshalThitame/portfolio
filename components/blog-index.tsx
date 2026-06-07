@@ -56,16 +56,16 @@ export function BlogIndex({
           <div>
             <motion.p
               className="blog-kicker"
-              initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.72, ease: premiumEase }}
             >
               Insights & Learnings
             </motion.p>
             <motion.h1
               className="font-display text-5xl font-black leading-[0.92] tracking-normal text-white sm:text-6xl md:text-7xl xl:text-8xl"
-              initial={{ opacity: 0, y: 32, filter: "blur(14px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.88, ease: premiumEase }}
             >
               Practical writing for
@@ -73,8 +73,8 @@ export function BlogIndex({
             </motion.h1>
             <motion.p
               className="mt-7 max-w-3xl text-lg leading-8 text-frost/70 sm:text-xl"
-              initial={{ opacity: 0, y: 22, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.78, ease: premiumEase }}
             >
               Articles on building real products, SaaS platforms, AI features,
@@ -84,8 +84,8 @@ export function BlogIndex({
 
           <motion.form
             className="blog-newsletter"
-            initial={{ opacity: 0, y: 32, filter: "blur(12px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.24, duration: 0.82, ease: premiumEase }}
             onSubmit={(event) => event.preventDefault()}
           >
@@ -183,8 +183,8 @@ function ArticleCard({
   return (
     <motion.article
       className={`blog-card ${featured ? "blog-card-featured" : ""}`}
-      initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ delay: index * 0.05, duration: 0.72, ease: premiumEase }}
       whileHover={{ y: -6 }}

@@ -23,8 +23,7 @@ import {
   Zap,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { loadGsapScrollTrigger, shouldRunDepthMotion, shouldRunScrollMotion } from "@/lib/client-performance";
 import { siteConfig } from "@/lib/site-config";
 
 const premiumEase = [0.16, 1, 0.3, 1] as const;
@@ -275,16 +274,24 @@ export function PersonalBrandSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    if (!shouldRunScrollMotion()) return;
 
-    const context = gsap.context(() => {
+    const runDepthMotion = shouldRunDepthMotion();
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
+
+    const setupMotion = async () => {
+      const { gsap } = await loadGsapScrollTrigger();
+
+      if (cancelled) return;
+
+      const context = gsap.context(() => {
       gsap.fromTo(
         ".brand-reveal",
-        { y: 42, opacity: 0, filter: "blur(14px)" },
+        { y: 42, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          filter: "blur(0px)",
           duration: 1,
           ease: "power3.out",
           stagger: 0.08,
@@ -295,29 +302,31 @@ export function PersonalBrandSection() {
         },
       );
 
-      gsap.to(".brand-bg-shift", {
-        yPercent: -16,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.9,
-        },
-      });
-
-      gsap.utils.toArray<HTMLElement>(".brand-depth").forEach((element) => {
-        gsap.to(element, {
-          yPercent: -6,
+      if (runDepthMotion) {
+        gsap.to(".brand-bg-shift", {
+          yPercent: -16,
           ease: "none",
           scrollTrigger: {
-            trigger: element,
+            trigger: sectionRef.current,
             start: "top bottom",
             end: "bottom top",
-            scrub: 0.85,
+            scrub: 0.9,
           },
         });
-      });
+
+        gsap.utils.toArray<HTMLElement>(".brand-depth").forEach((element) => {
+          gsap.to(element, {
+            yPercent: -6,
+            ease: "none",
+            scrollTrigger: {
+              trigger: element,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.85,
+            },
+          });
+        });
+      }
 
       gsap.fromTo(
         ".brand-journey-line-progress",
@@ -333,9 +342,17 @@ export function PersonalBrandSection() {
           },
         },
       );
-    }, sectionRef);
+      }, sectionRef);
 
-    return () => context.revert();
+      cleanup = () => context.revert();
+    };
+
+    void setupMotion();
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return (
@@ -395,8 +412,8 @@ export function PersonalBrandSection() {
 
           <motion.div
             className="brand-depth"
-            initial={{ opacity: 0, y: 36, filter: "blur(14px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 36 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-90px" }}
             transition={{ duration: 0.82, ease: premiumEase }}
           >
@@ -435,8 +452,8 @@ export function PersonalBrandSection() {
               <motion.article
                 key={step.title}
                 className="brand-journey-step"
-                initial={{ opacity: 0, x: index % 2 ? 32 : -32, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, x: index % 2 ? 32 : -32 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-90px" }}
                 transition={{ delay: index * 0.06, duration: 0.74, ease: premiumEase }}
               >
@@ -459,8 +476,8 @@ export function PersonalBrandSection() {
             {expertise.map((item, index) => (
               <motion.div
                 key={item.title}
-                initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-90px" }}
                 transition={{ delay: index * 0.05, duration: 0.72, ease: premiumEase }}
               >
@@ -484,8 +501,8 @@ export function PersonalBrandSection() {
               <motion.article
                 key={item.title}
                 className="brand-building-card"
-                initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-90px" }}
                 transition={{ delay: index * 0.05, duration: 0.7, ease: premiumEase }}
                 whileHover={{ y: -5 }}
@@ -508,8 +525,8 @@ export function PersonalBrandSection() {
               <motion.div
                 key={article.title}
                 className="brand-insight-card"
-                initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-90px" }}
                 transition={{ delay: index * 0.05, duration: 0.72, ease: premiumEase }}
                 whileHover={{ y: -5 }}
@@ -534,8 +551,8 @@ export function PersonalBrandSection() {
             {values.map((value, index) => (
               <motion.div
                 key={value.title}
-                initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-90px" }}
                 transition={{ delay: index * 0.05, duration: 0.72, ease: premiumEase }}
               >
@@ -564,8 +581,8 @@ export function PersonalBrandSection() {
                   target={item.href.startsWith("http") ? "_blank" : undefined}
                   rel={item.href.startsWith("http") ? "noreferrer" : undefined}
                   className="brand-social-card"
-                  initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-90px" }}
                   transition={{ delay: index * 0.05, duration: 0.72, ease: premiumEase }}
                 >
@@ -589,8 +606,8 @@ export function PersonalBrandSection() {
               <motion.article
                 key={milestone}
                 className="brand-milestone-card"
-                initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-90px" }}
                 transition={{ delay: index * 0.06, duration: 0.72, ease: premiumEase }}
               >
@@ -603,8 +620,8 @@ export function PersonalBrandSection() {
 
         <motion.div
           className="brand-signature"
-          initial={{ opacity: 0, y: 34, filter: "blur(12px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 34 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-90px" }}
           transition={{ duration: 0.86, ease: premiumEase }}
         >

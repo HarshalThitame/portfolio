@@ -93,6 +93,7 @@ export function PremiumHero() {
       <div aria-hidden="true" className="aurora-layer absolute -inset-24" />
       <div aria-hidden="true" className="grid-layer absolute inset-x-[-16%] bottom-[-24%] h-[74vh]" />
       <div aria-hidden="true" className="spotlight-layer pointer-events-none absolute inset-0" />
+      <div aria-hidden="true" className="hero-volumetric-light pointer-events-none absolute inset-0" />
       <div
         aria-hidden="true"
         className="pointer-follower pointer-events-none absolute z-[4] hidden size-52 rounded-full lg:block"
@@ -149,6 +150,12 @@ export function PremiumHero() {
                   <span
                     key={`${line}-${characterIndex}`}
                     className="inline-block will-change-transform"
+                    data-char=""
+                    style={
+                      {
+                        "--char-delay": `${260 + lineIndex * 120 + characterIndex * 14}ms`,
+                      } as CSSProperties
+                    }
                   >
                     {character === " " ? "\u00A0" : character}
                   </span>

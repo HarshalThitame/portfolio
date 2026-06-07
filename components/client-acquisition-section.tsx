@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { ComponentType, CSSProperties, PointerEvent, ReactNode } from "react";
 import {
   ArrowUpRight,
@@ -29,8 +29,7 @@ import {
   Zap,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { loadGsapScrollTrigger, shouldRunDepthMotion, shouldRunScrollMotion } from "@/lib/client-performance";
 import { trackEvent } from "@/lib/analytics";
 import { siteConfig } from "@/lib/site-config";
 
@@ -355,12 +354,13 @@ function CountMetric({
   index: number;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const [display, setDisplay] = useState(0);
+  const valueRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
 
+    let frame = 0;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
@@ -371,32 +371,35 @@ function CountMetric({
         const tick = (time: number) => {
           const progress = Math.min(1, (time - startedAt) / duration);
           const eased = 1 - Math.pow(1 - progress, 3);
-          setDisplay(Math.round(value * eased));
-          if (progress < 1) requestAnimationFrame(tick);
+          if (valueRef.current) valueRef.current.textContent = String(Math.round(value * eased));
+          if (progress < 1) frame = requestAnimationFrame(tick);
         };
 
-        requestAnimationFrame(tick);
+        frame = requestAnimationFrame(tick);
         observer.disconnect();
       },
       { threshold: 0.35 },
     );
 
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [value]);
 
   return (
     <motion.article
       ref={ref}
       className="acquisition-metric-card"
-      initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ delay: index * 0.06, duration: 0.72, ease: premiumEase }}
     >
       <Icon className="size-5 text-cyanflare" />
       <strong>
-        {display}
+        <span ref={valueRef}>0</span>
         {suffix}
       </strong>
       <span>{label}</span>
@@ -408,16 +411,24 @@ export function ClientAcquisitionSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    if (!shouldRunScrollMotion()) return;
 
-    const context = gsap.context(() => {
+    const runDepthMotion = shouldRunDepthMotion();
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
+
+    const setupMotion = async () => {
+      const { gsap } = await loadGsapScrollTrigger();
+
+      if (cancelled) return;
+
+      const context = gsap.context(() => {
       gsap.fromTo(
         ".acquisition-reveal",
-        { y: 42, opacity: 0, filter: "blur(14px)" },
+        { y: 42, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          filter: "blur(0px)",
           duration: 1,
           ease: "power3.out",
           stagger: 0.08,
@@ -428,16 +439,18 @@ export function ClientAcquisitionSection() {
         },
       );
 
-      gsap.to(".acquisition-bg-shift", {
-        yPercent: -16,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.9,
-        },
-      });
+      if (runDepthMotion) {
+        gsap.to(".acquisition-bg-shift", {
+          yPercent: -16,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.9,
+          },
+        });
+      }
 
       gsap.fromTo(
         ".acquisition-process-progress",
@@ -453,9 +466,17 @@ export function ClientAcquisitionSection() {
           },
         },
       );
-    }, sectionRef);
+      }, sectionRef);
 
-    return () => context.revert();
+      cleanup = () => context.revert();
+    };
+
+    void setupMotion();
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return (
@@ -514,8 +535,8 @@ export function ClientAcquisitionSection() {
 
           <motion.div
             className="acquisition-hero-panel"
-            initial={{ opacity: 0, y: 34, filter: "blur(14px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 34 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-90px" }}
             transition={{ duration: 0.82, ease: premiumEase }}
           >
@@ -543,8 +564,8 @@ export function ClientAcquisitionSection() {
               return (
                 <motion.div
                   key={industry.title}
-                  initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-90px" }}
                   transition={{ delay: index * 0.04, duration: 0.68, ease: premiumEase }}
                 >
@@ -569,8 +590,8 @@ export function ClientAcquisitionSection() {
                 key={problem.title}
                 className="acquisition-problem-card"
                 open={index === 0}
-                initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-90px" }}
                 transition={{ delay: index * 0.035, duration: 0.62, ease: premiumEase }}
               >
@@ -595,8 +616,8 @@ export function ClientAcquisitionSection() {
                 <motion.article
                   key={item.title}
                   className={`acquisition-package-card ${item.featured ? "acquisition-package-featured" : ""}`}
-                  initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-90px" }}
                   transition={{ delay: index * 0.06, duration: 0.72, ease: premiumEase }}
                   whileHover={{ y: -6 }}
@@ -635,8 +656,8 @@ export function ClientAcquisitionSection() {
                 <motion.div
                   key={reason.title}
                   className="acquisition-reason-card"
-                  initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-90px" }}
                   transition={{ delay: index * 0.04, duration: 0.64, ease: premiumEase }}
                 >
@@ -660,8 +681,8 @@ export function ClientAcquisitionSection() {
                 <motion.article
                   key={step.step}
                   className="acquisition-process-step"
-                  initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-90px" }}
                   transition={{ delay: index * 0.05, duration: 0.7, ease: premiumEase }}
                 >
@@ -678,8 +699,8 @@ export function ClientAcquisitionSection() {
         <div className="acquisition-block">
           <motion.div
             className="acquisition-inquiry"
-            initial={{ opacity: 0, y: 32, filter: "blur(12px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-90px" }}
             transition={{ duration: 0.82, ease: premiumEase }}
           >
@@ -712,8 +733,8 @@ export function ClientAcquisitionSection() {
             {trustSignals.map((signal, index) => (
               <motion.span
                 key={signal}
-                initial={{ opacity: 0, y: 16, filter: "blur(8px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ delay: index * 0.035, duration: 0.62, ease: premiumEase }}
               >
@@ -739,8 +760,8 @@ export function ClientAcquisitionSection() {
               <motion.article
                 key={testimonial.author}
                 className="acquisition-testimonial-card"
-                initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-90px" }}
                 transition={{ delay: index * 0.06, duration: 0.72, ease: premiumEase }}
               >
@@ -756,8 +777,8 @@ export function ClientAcquisitionSection() {
 
         <motion.div
           className="acquisition-final-cta"
-          initial={{ opacity: 0, y: 34, filter: "blur(12px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 34 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-90px" }}
           transition={{ duration: 0.86, ease: premiumEase }}
         >
