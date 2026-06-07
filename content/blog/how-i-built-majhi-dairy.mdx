@@ -1,0 +1,63 @@
+---
+title: "How I Built Majhi Dairy"
+description: "A practical breakdown of building a dairy management platform for milk collection, farmer records, reports and multilingual workflows."
+date: "2026-06-07"
+category: "Case Study"
+tags:
+  - SaaS
+  - Agriculture
+  - Product Design
+  - Next.js
+featured: true
+---
+
+Majhi Dairy started with a simple product question: what would make daily dairy operations easier to manage?
+
+The answer was not a flashy dashboard. The real value was in reducing repeated manual work: milk collection entries, farmer records, reports, and mobile workflows that could be used by people working away from a desk.
+
+## The product problem
+
+Dairy businesses often run on a mix of notebooks, spreadsheets, phone calls, and memory. That works for a while, but it becomes fragile as the number of farmers, daily entries, and reports grows.
+
+The product needed to support:
+
+- daily milk collection tracking
+- farmer management
+- production records
+- reports and analytics
+- Marathi and English workflows
+- mobile-first usage
+
+## Designing for real users
+
+The most important design decision was keeping the interface practical. A dairy operator does not need decorative complexity. They need screens that are clear, fast, and hard to misunderstand.
+
+That meant prioritizing:
+
+- large touch targets
+- clear field labels
+- simple navigation
+- strong contrast
+- local-language support
+
+## Data model thinking
+
+The core data needed to stay structured enough for reports, but simple enough to scale.
+
+```ts
+type MilkCollection = {
+  farmerId: string;
+  collectionDate: string;
+  quantityLiters: number;
+  fatPercentage?: number;
+  shift: "morning" | "evening";
+};
+```
+
+This structure keeps collection records tied to farmers while leaving room for future analytics.
+
+## What I learned
+
+Building Majhi Dairy reinforced a simple lesson: good software is not about adding more screens. It is about understanding the workflow well enough to remove friction.
+
+When software supports the way people already work, adoption becomes much easier.
