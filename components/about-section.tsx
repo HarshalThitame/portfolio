@@ -466,8 +466,8 @@ export function AboutSection() {
                 <motion.div
                   key={milestone}
                   className="relative pl-12"
-                  initial={{ opacity: 0, x: 24 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-80px" }}
                   transition={{ delay: index * 0.08, duration: 0.72, ease: premiumEase }}
                 >

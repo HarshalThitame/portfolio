@@ -939,6 +939,10 @@ html.mobile-menu-open .floating-whatsapp {
     min-height: 48px;
   }
 
+  :is(.labs-search-shell input, .labs-filter-row button, .lab-range-control input, .blog-search-shell input, .blog-filter-row button, .blog-tag-row button, .blog-newsletter-row input, .article-newsletter input, .article-back-link, .article-share a, .article-share button) {
+    min-height: 44px;
+  }
+
   :is(.tech-tile, .approach-card, .project-case, .service-bento-card, .contact-card, .brand-card, .lab-preview-panel, .studio-card, .studio-case-card) {
     touch-action: manipulation;
   }
@@ -1014,6 +1018,27 @@ html[data-performance="lite"] :is(.studio-card:hover, .studio-case-card:hover, .
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 24px 80px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-performance="balanced"] :is(.project-case, .device-mockup, .project-metric-card, .case-detail, .project-button),
+html[data-performance="lite"] :is(.project-case, .device-mockup, .project-metric-card, .case-detail, .project-button) {
+  backdrop-filter: none !important;
+}
+
+html[data-performance="balanced"] :is(.blog-kicker, .blog-newsletter, .blog-card, .blog-search-shell, .article-hero, .article-sidebar, .article-related, .article-newsletter, .labs-control-panel, .lab-preview-panel, .lab-sandbox, .lab-architecture-grid article, .lab-card, .labs-search-shell, .labs-selector),
+html[data-performance="lite"] :is(.blog-kicker, .blog-newsletter, .blog-card, .blog-search-shell, .article-hero, .article-sidebar, .article-related, .article-newsletter, .labs-control-panel, .lab-preview-panel, .lab-sandbox, .lab-architecture-grid article, .lab-card, .labs-search-shell, .labs-selector) {
+  backdrop-filter: none !important;
+}
+
+html[data-performance="balanced"] .project-visual-glow,
+html[data-performance="lite"] .project-visual-glow {
+  opacity: 0.5;
+  filter: blur(38px);
+}
+
+html[data-performance="balanced"] .dairy-chart i,
+html[data-performance="lite"] .dairy-chart i {
+  animation-duration: 4.8s;
 }
 
 @media (max-width: 1024px) {
@@ -1385,6 +1410,8 @@ html[data-performance="full"] :is(.about-mesh, .projects-mesh, .services-mesh, .
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  isolation: isolate;
   perspective: 1400px;
 }
 
@@ -1409,6 +1436,7 @@ html[data-performance="full"] :is(.about-mesh, .projects-mesh, .services-mesh, .
 
 .mockup-stage {
   position: relative;
+  flex: 0 1 min(100%, 42rem);
   width: min(100%, 42rem);
   min-height: 32rem;
   transform-style: preserve-3d;
@@ -1858,46 +1886,114 @@ html[data-performance="full"] :is(.about-mesh, .projects-mesh, .services-mesh, .
 @media (max-width: 640px) {
   .project-case {
     border-radius: 1.6rem;
+    gap: 1.5rem;
+    padding: 1.25rem;
+  }
+
+  .project-visual,
+  .project-copy {
+    width: 100%;
   }
 
   .project-visual-wrap {
-    min-height: 24rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: auto;
+    align-items: start;
+    justify-items: stretch;
+    gap: 0.95rem;
+    perspective: 900px;
   }
 
   .mockup-stage {
-    min-height: 24rem;
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 100%;
+    max-width: none;
+    height: clamp(21rem, 90vw, 25rem);
+    min-height: 0;
+    justify-self: stretch;
   }
 
   .desktop-mockup,
   .dashboard-mockup {
-    left: 0;
-    width: 100%;
-    height: 18rem;
-    transform: rotateY(-6deg) rotateX(3deg);
+    left: 50%;
+    top: 0.9rem;
+    width: min(94%, 22rem);
+    height: clamp(12.75rem, 54vw, 17rem);
+    transform: translateX(-50%) rotateY(-6deg) rotateX(3deg);
+    transform-origin: center;
   }
 
   .dashboard-mockup {
-    transform: rotateY(6deg) rotateX(3deg);
+    padding: 0.8rem;
+    transform: translateX(-50%) rotateY(6deg) rotateX(3deg);
   }
 
   .tablet-mockup {
-    width: 10.5rem;
-    height: 13.5rem;
-    right: -1rem;
+    top: clamp(5.5rem, 25vw, 7rem);
+    right: 0.15rem;
+    width: clamp(7.2rem, 34vw, 10.5rem);
+    height: clamp(9.25rem, 44vw, 13.5rem);
+    transform: rotateY(12deg) rotateX(4deg) rotateZ(3deg) translateZ(44px);
   }
 
   .phone-mockup,
   .dairy-phone {
-    width: 7.3rem;
-    height: 15rem;
+    right: clamp(0.9rem, 14vw, 4.5rem);
+    bottom: 0.7rem;
+    width: clamp(5.8rem, 28vw, 7.4rem);
+    height: clamp(12.4rem, 58vw, 15.3rem);
+    transform: rotateY(-14deg) rotateX(6deg) rotateZ(-4deg) translateZ(54px);
+  }
+
+  .dairy-phone {
+    left: 0.35rem;
+    right: auto;
+    transform: rotateY(14deg) rotateX(6deg) rotateZ(4deg) translateZ(54px);
+  }
+
+  .floating-analytics {
+    right: 0.45rem;
+    bottom: 2.25rem;
+    max-width: min(11.5rem, 56%);
+    border-radius: 1rem;
+    padding: 0.68rem 0.78rem;
+    white-space: normal;
+    font-size: 0.7rem;
+    line-height: 1.35;
+  }
+
+  .browser-bar {
+    height: 2rem;
+    padding-inline: 0.72rem;
+  }
+
+  .flux-screen {
+    height: calc(100% - 2rem);
+    padding: 0.78rem;
+  }
+
+  .flux-nav span,
+  .language-pill {
+    padding: 0.32rem 0.5rem;
+    font-size: 0.58rem;
+  }
+
+  .tablet-content,
+  .phone-flux,
+  .dairy-mobile-content {
+    padding: 0.85rem;
   }
 
   .flux-hero-grid {
     grid-template-columns: 1fr;
+    gap: 0.7rem;
+    margin-top: 0.8rem;
   }
 
   .flux-hero-grid h4 {
-    font-size: 1.55rem;
+    font-size: clamp(1.35rem, 7vw, 1.85rem);
   }
 
   .flux-printer,
@@ -1905,18 +2001,61 @@ html[data-performance="full"] :is(.about-mesh, .projects-mesh, .services-mesh, .
     display: none;
   }
 
+  .dairy-grid {
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .dairy-stat,
+  .dairy-table {
+    padding: 0.68rem;
+  }
+
+  .dairy-stat strong {
+    font-size: 1rem;
+  }
+
   .dairy-chart {
-    height: 5.6rem;
+    height: clamp(4.6rem, 23vw, 5.6rem);
+    padding: 0.68rem;
+  }
+
+  .milk-entry {
+    padding: 0.72rem;
+  }
+
+  .milk-entry b {
+    font-size: clamp(1.12rem, 5.5vw, 1.36rem);
+    white-space: nowrap;
   }
 
   .project-metrics {
     position: relative;
-    margin-top: -1rem;
+    inset: auto;
+    display: grid;
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin-top: 0;
   }
 
   .project-metric-card {
     min-width: 0;
-    flex: 1 1 8rem;
+    padding: 0.78rem;
+  }
+
+  .project-metric-card:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .project-metric-card strong {
+    font-size: 0.95rem;
+  }
+
+  .project-metric-card span {
+    font-size: 0.62rem;
   }
 }
 
@@ -6954,7 +7093,9 @@ html[data-performance="full"] :is(.about-mesh, .projects-mesh, .services-mesh, .
 
   .hero-shell [aria-label="Scroll to next section"] {
     bottom: 1rem;
-    transform: translateX(-50%) scale(0.86);
+    width: 3rem;
+    min-width: 3rem;
+    transform: translateX(-50%);
   }
 }
 
@@ -8260,9 +8401,9 @@ html[data-performance="full"] :is(.about-mesh, .projects-mesh, .services-mesh, .
 }
 
 @media (max-width: 430px) {
-  .project-visual-wrap,
   .mockup-stage {
-    min-height: 21.5rem;
+    height: clamp(20.5rem, 104vw, 21.5rem);
+    min-height: 0;
   }
 
   .desktop-mockup,
@@ -8271,15 +8412,15 @@ html[data-performance="full"] :is(.about-mesh, .projects-mesh, .services-mesh, .
   }
 
   .tablet-mockup {
-    right: -0.25rem;
-    width: 9rem;
-    height: 12rem;
+    right: 0.15rem;
+    width: clamp(6.9rem, 31vw, 9rem);
+    height: clamp(9rem, 42vw, 12rem);
   }
 
   .phone-mockup,
   .dairy-phone {
-    width: 6.6rem;
-    height: 13.7rem;
+    width: clamp(5.6rem, 27vw, 6.8rem);
+    height: clamp(12rem, 56vw, 13.8rem);
   }
 
   .project-metrics {
@@ -8337,9 +8478,9 @@ html[data-performance="full"] :is(.about-mesh, .projects-mesh, .services-mesh, .
     font-size: 0.68rem;
   }
 
-  .project-visual-wrap,
   .mockup-stage {
-    min-height: 20rem;
+    height: 20rem;
+    min-height: 0;
   }
 
   .desktop-mockup,
@@ -8365,6 +8506,38 @@ html[data-performance="full"] :is(.about-mesh, .projects-mesh, .services-mesh, .
 
 :is(.project-case, .service-bento-card, .contact-card, .brand-card, .brand-building-card, .brand-insight-card, .brand-social-card, .brand-milestone-card, .lab-card, .studio-card, .studio-case-card, .case-story-card, .case-info-card, .case-gallery-card, .acquisition-card, .acquisition-package-card) {
   contain: layout paint;
+}
+
+@media (max-width: 640px) {
+  :is(.labs-search-shell input, .blog-search-shell input, .blog-newsletter-row input, .article-newsletter input) {
+    height: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  :is(.labs-filter-row button, .blog-filter-row button, .blog-tag-row button) {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding-block: 0.35rem;
+  }
+
+  .lab-range-control input {
+    height: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .article-back-link,
+  .article-share a,
+  .article-share button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .article-toc a,
+  .article-prose a {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

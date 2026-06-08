@@ -197,7 +197,7 @@ export function PremiumHero() {
           </div>
         </div>
 
-        <div className="parallax-orb absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center opacity-80 lg:flex xl:right-8">
+        <div aria-hidden="true" className="parallax-orb absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center opacity-80 lg:flex xl:right-8">
           <AbstractOrb />
         </div>
       </div>
@@ -205,7 +205,7 @@ export function PremiumHero() {
       <a
         href="#about"
         aria-label="Scroll to next section"
-        className="absolute bottom-7 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-3 text-white/52 outline-none transition-colors duration-300 hover:text-white focus-visible:text-white"
+        className="absolute bottom-7 left-1/2 z-20 flex min-h-12 min-w-12 -translate-x-1/2 flex-col items-center justify-center gap-3 text-white/52 outline-none transition-colors duration-300 hover:text-white focus-visible:text-white"
       >
         <span className="h-12 w-7 rounded-full border border-white/18 bg-white/[0.03] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl">
           <span
