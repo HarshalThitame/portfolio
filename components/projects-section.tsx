@@ -208,14 +208,36 @@ function FluxMockup() {
             <strong>FLUX3D</strong>
             <span>Quote</span>
           </div>
+          <div className="flux-live-bar" aria-hidden="true">
+            <span>Prototype build</span>
+            <strong>Layer 184 / 220</strong>
+          </div>
           <div className="flux-hero-grid">
             <div>
               <p>Industrial 3D Printing</p>
               <h4>Precision parts, fast prototypes.</h4>
               <div className="flux-cta-line" />
             </div>
-            <div className="flux-printer">
-              <Box className="size-10" />
+            <div className="flux-print-lab" aria-hidden="true">
+              <div className="flux-lab-grid" />
+              <div className="flux-gantry">
+                <span />
+              </div>
+              <div className="flux-print-head">
+                <Box className="size-5" />
+              </div>
+              <div className="flux-laser-beam" />
+              <div className="flux-scan-ring" />
+              <div className="flux-build-plate">
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="flux-part-core">
+                <span />
+                <span />
+              </div>
             </div>
           </div>
           <div className="flux-materials">
@@ -223,6 +245,30 @@ function FluxMockup() {
             <span>PETG</span>
             <span>ABS</span>
           </div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="flux-status-card flux-quote-card project-depth"
+        animate={{ y: [8, -9, 8], rotate: [-1.2, 1.4, -1.2] }}
+        transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <PackageCheck className="size-5 text-cyanflare" />
+        <div>
+          <span>Instant RFQ</span>
+          <strong>Manufacturing ready</strong>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="flux-status-card flux-tolerance-card project-depth"
+        animate={{ y: [-7, 8, -7], rotate: [1, -1.5, 1] }}
+        transition={{ duration: 9.2, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Gauge className="size-5 text-rosegold" />
+        <div>
+          <span>Tolerance</span>
+          <strong>0.2mm detail</strong>
         </div>
       </motion.div>
 
@@ -278,6 +324,10 @@ function DairyMockup() {
           </div>
           <div className="language-pill">मराठी / EN</div>
         </div>
+        <div className="dairy-live-strip" aria-hidden="true">
+          <span>Live collection</span>
+          <strong>Synced 4 min ago</strong>
+        </div>
         <div className="dairy-grid">
           <div className="dairy-stat">
             <span>Milk Today</span>
@@ -287,17 +337,39 @@ function DairyMockup() {
             <span>Farmers</span>
             <strong>86</strong>
           </div>
-          <div className="dairy-chart">
-            <i style={{ height: "52%" }} />
-            <i style={{ height: "70%" }} />
-            <i style={{ height: "42%" }} />
-            <i style={{ height: "82%" }} />
-            <i style={{ height: "62%" }} />
+          <div className="dairy-flow-panel" aria-hidden="true">
+            <div className="dairy-route-map">
+              <span className="dairy-route-line" />
+              <i />
+              <i />
+              <i />
+              <b />
+            </div>
+            <div className="dairy-collection-card">
+              <span>Farmer entry</span>
+              <strong>12.5 L</strong>
+              <small>Fat 4.2 • SNF 8.6</small>
+              <div className="dairy-fill-meter">
+                <i />
+              </div>
+            </div>
           </div>
-          <div className="dairy-table">
-            <span />
-            <span />
-            <span />
+          <div className="dairy-report-panel" aria-hidden="true">
+            <div className="dairy-report-title">
+              <BarChart3 className="size-4 text-cyanflare" />
+              <span>Daily report</span>
+            </div>
+            <div className="dairy-report-bars">
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+            </div>
+            <div className="dairy-report-feed">
+              <span />
+              <span />
+            </div>
           </div>
         </div>
       </motion.div>
@@ -312,6 +384,11 @@ function DairyMockup() {
           <Languages className="size-5 text-rosegold" />
           <strong>दूध संकलन</strong>
           <span>Farmer: Patil</span>
+          <div className="dairy-language-switch">
+            <span>मराठी</span>
+            <span>EN</span>
+            <i />
+          </div>
           <div className="milk-entry">
             <b>12.5 L</b>
             <small>Fat 4.2</small>
@@ -325,7 +402,7 @@ function DairyMockup() {
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
       >
         <BarChart3 className="size-5 text-cyanflare" />
-        <span>Weekly report ready</span>
+        <span>Payment & report synced</span>
       </motion.div>
     </div>
   );
