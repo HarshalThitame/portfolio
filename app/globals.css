@@ -912,8 +912,10 @@ blockquote {
 }
 
 .site-mark {
-  width: 2.55rem;
+  width: auto;
+  min-width: 2.55rem;
   height: 2.55rem;
+  gap: 0.56rem;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background:
@@ -923,9 +925,28 @@ blockquote {
   font-family: var(--font-space), sans-serif;
   font-weight: 900;
   box-shadow: 0 0 34px rgba(97, 244, 255, 0.11);
+  padding: 0 0.92rem 0 0.42rem;
   transition:
     transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.site-monogram {
+  display: inline-grid;
+  width: 1.92rem;
+  height: 1.92rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.site-mark small {
+  color: rgba(248, 251, 255, 0.78);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .site-mark:hover,
@@ -1547,6 +1568,20 @@ html.enhanced-chrome-ready .static-site-chrome .scroll-progress-shell {
   .site-mobile-toggle {
     width: 3rem;
     height: 3rem;
+  }
+
+  .site-mark {
+    min-width: 3rem;
+    padding: 0;
+  }
+
+  .site-mark small {
+    display: none;
+  }
+
+  .site-monogram {
+    width: 2rem;
+    height: 2rem;
   }
 
   .site-mobile-toggle {

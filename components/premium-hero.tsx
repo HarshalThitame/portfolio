@@ -12,9 +12,9 @@ const mobileHeadlineLines = ["BUILDING", "DIGITAL", "PRODUCTS", "THAT PEOPLE", "
 const headlineLabel = headlineLines.join(" ");
 
 const heroMetrics = [
-  "Product-grade UI",
-  "AI-ready builds",
-  "Scalable systems",
+  "Business-ready products",
+  "Fast Next.js delivery",
+  "AI + SaaS thinking",
 ];
 
 function MagneticButton({ href, variant, children }: MagneticButtonProps) {
@@ -92,7 +92,7 @@ export function PremiumHero() {
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-cyanflare opacity-70" />
               <span className="relative inline-flex size-2 rounded-full bg-cyanflare shadow-[0_0_16px_rgba(97,244,255,0.9)]" />
             </span>
-            Available for freelance projects
+            Available for selective product work
           </div>
 
           <h1
@@ -122,20 +122,20 @@ export function PremiumHero() {
           </h1>
 
           <p
-            className="mt-8 max-w-[20rem] text-balance text-base leading-8 text-frost/78 sm:max-w-2xl sm:text-lg lg:text-xl"
+            className="mt-8 max-w-[20rem] text-base leading-8 text-frost/78 sm:max-w-2xl sm:text-lg lg:text-xl"
           >
-            Full Stack Developer focused on building modern web applications,
-            AI-powered solutions and exceptional user experiences.
+            I build fast, reliable web products for businesses that need clarity,
+            conversion and modern software.
           </p>
 
           <div
             className="mt-10 flex w-full flex-col items-stretch justify-center gap-4 sm:w-auto sm:flex-row"
           >
             <MagneticButton href="#featured-projects" variant="primary">
-              View My Work
+              Explore Case Studies
             </MagneticButton>
             <MagneticButton href="#contact-form" variant="secondary">
-              Let&apos;s Talk
+              Start A Project
             </MagneticButton>
           </div>
 

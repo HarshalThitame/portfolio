@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Space_Grotesk } from "next/font/google";
-import { Analytics } from "@/components/analytics";
-import { DeferredSiteExperience } from "@/components/deferred-site-experience";
 import { StaticSiteChrome } from "@/components/static-site-chrome";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
 import "./globals.css";
+
+const googleAnalyticsId = process.env.NEXT_PUBLIC_GA_ID;
 
 const geist = Geist({
   subsets: ["latin"],
@@ -136,6 +136,49 @@ export default function RootLayout({
       },
     },
   ];
+  const analyticsScript = `
+    (() => {
+      const send = () => {
+        const payload = JSON.stringify({
+          type: "portfolio_visit",
+          path: location.pathname,
+          name: "portfolio_visit",
+          page_path: location.pathname,
+          page_title: document.title,
+          timestamp: new Date().toISOString()
+        });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon("/api/monitoring", new Blob([payload], { type: "application/json" }));
+        } else {
+          fetch("/api/monitoring", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: payload,
+            keepalive: true
+          }).catch(() => {});
+        }
+      };
+      const schedule = window.requestIdleCallback
+        ? () => window.requestIdleCallback(send, { timeout: 6000 })
+        : () => window.setTimeout(send, 3500);
+      schedule();
+    })();
+  `;
+  const googleAnalyticsScript = googleAnalyticsId
+    ? `
+      window.setTimeout(() => {
+        const script = document.createElement("script");
+        script.async = true;
+        script.src = "https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}";
+        document.head.appendChild(script);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){window.dataLayer.push(arguments);}
+        window.gtag = gtag;
+        gtag("js", new Date());
+        gtag("config", "${googleAnalyticsId}", { page_path: window.location.pathname });
+      }, 4500);
+    `
+    : "";
 
   return (
     <html lang="en" data-performance="balanced" className={`${geist.variable} ${spaceGrotesk.variable}`}>
@@ -145,10 +188,12 @@ export default function RootLayout({
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <Analytics />
         <StaticSiteChrome />
-        <DeferredSiteExperience />
         {children}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: `${analyticsScript}${googleAnalyticsScript}` }}
+        />
       </body>
     </html>
   );

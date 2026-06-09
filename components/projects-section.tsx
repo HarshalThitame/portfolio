@@ -44,7 +44,7 @@ const projects: Project[] = [
     name: "FLUX3D",
     tagline: "Transforming Ideas Into Precision 3D Printed Solutions",
     description:
-      "A modern business platform designed for showcasing professional 3D printing services, rapid prototyping capabilities and custom manufacturing solutions.",
+      "A conversion-focused platform for professional 3D printing services, built to present manufacturing capability with the polish and trust of a modern B2B product company.",
     highlights: [
       "Premium business website",
       "Lead generation focused",
@@ -55,22 +55,22 @@ const projects: Project[] = [
     ],
     stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Vercel"],
     metrics: [
-      { label: "Quote flow", value: "Lead-ready", icon: Zap },
-      { label: "Experience", value: "100%", icon: MonitorSmartphone },
-      { label: "Category", value: "B2B", icon: Factory },
+      { label: "Inquiry flow", value: "Lead-ready", icon: Zap },
+      { label: "Responsive UX", value: "100%", icon: MonitorSmartphone },
+      { label: "Market", value: "B2B", icon: Factory },
     ],
     details: [
       {
         title: "Challenge",
-        body: "3D printing services need to communicate quality, material capability and trust quickly while guiding visitors toward an inquiry.",
+        body: "Industrial services need to explain capability, quality and trust within seconds while making it easy for serious buyers to request a quote.",
       },
       {
         title: "Solution",
-        body: "The platform presents services, pricing intent and manufacturing credibility through a polished responsive experience built for conversion.",
+        body: "Flux3D uses a sharp product narrative, responsive service structure and clear conversion paths to turn technical capability into a confident buying experience.",
       },
       {
         title: "Outcome",
-        body: "Flux3D feels like a professional manufacturing brand, helping customers understand the offer and move toward a project discussion faster.",
+        body: "The result feels like a professional manufacturing brand, helping customers understand the offer faster and move naturally toward a project discussion.",
       },
     ],
     primaryAction: "Live Website",
@@ -84,7 +84,7 @@ const projects: Project[] = [
     name: "Majhi Dairy",
     tagline: "Digitizing Dairy Operations For Modern Farmers",
     description:
-      "A comprehensive dairy management application designed to streamline milk collection, farmer records, reporting and multilingual workflows.",
+      "A practical business platform designed to simplify milk collection, farmer records, multilingual workflows and reporting for dairy teams working in the field.",
     highlights: [
       "Multi-language support",
       "Marathi and English interface",
@@ -97,21 +97,21 @@ const projects: Project[] = [
     stack: ["Next.js", "React", "TypeScript", "Supabase", "PostgreSQL", "Tailwind CSS"],
     metrics: [
       { label: "Languages", value: "2", icon: Languages },
-      { label: "Workflow", value: "Mobile", icon: Smartphone },
-      { label: "Reports", value: "Live", icon: LineChart },
+      { label: "Primary UX", value: "Mobile", icon: Smartphone },
+      { label: "Reporting", value: "Live", icon: LineChart },
     ],
     details: [
       {
         title: "Challenge",
-        body: "Dairy operations rely on accurate daily collection, farmer records and reports, often across teams that need simple mobile workflows.",
+        body: "Dairy operations depend on accurate daily collection, farmer history, payments and reporting, often handled by teams that need simple mobile workflows.",
       },
       {
         title: "Solution",
-        body: "Majhi Dairy centralizes milk entries, farmer profiles, multilingual UI patterns and reporting in a practical mobile-first product.",
+        body: "Majhi Dairy centralizes collection entries, farmer profiles, Marathi-English workflows and operational reporting into one mobile-first system.",
       },
       {
         title: "Outcome",
-        body: "The platform reduces manual tracking friction and creates a clearer operational system for collection, records and decision-making.",
+        body: "The platform reduces manual tracking friction and creates a clearer operating layer for records, reports and day-to-day decision-making.",
       },
     ],
     primaryAction: "Live Demo",
@@ -643,8 +643,8 @@ export function ProjectsSection() {
             <span className="headline-accent block">Built With Purpose</span>
           </h2>
           <p className="projects-header-reveal mx-auto mt-7 max-w-3xl text-lg leading-8 text-frost/70 sm:text-xl">
-            A collection of products, platforms and digital experiences designed
-            to solve real business problems.
+          Practical products and digital systems designed with business context,
+            technical clarity and user experience working together.
           </p>
         </header>
 

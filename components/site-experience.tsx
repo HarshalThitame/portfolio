@@ -183,7 +183,8 @@ export function SiteExperience() {
             onClick={() => setMobileMenuOpen(false)}
             aria-label="Go to top"
           >
-            <span>H</span>
+            <span className="site-monogram">H</span>
+            <small>Harshal</small>
           </Link>
 
           <div className="site-nav-links">

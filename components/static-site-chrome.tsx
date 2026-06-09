@@ -24,7 +24,8 @@ export function StaticSiteChrome() {
       <header className="site-nav">
         <nav aria-label="Primary navigation" className="site-nav-inner">
           <Link href="/#hero" className="site-mark" aria-label="Go to top">
-            <span>H</span>
+            <span className="site-monogram">H</span>
+            <small>Harshal</small>
           </Link>
 
           <div className="site-nav-links">
