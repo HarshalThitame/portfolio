@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Linkedin, Mail, Menu, MessageCircle, Sparkles, X } from "lucide-react";
+import { ArrowUpRight, Mail, Menu, MessageCircle, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { siteConfig } from "@/lib/site-config";
@@ -674,15 +674,6 @@ export function SiteExperience() {
         >
           <MessageCircle className="size-4" />
           <span>WhatsApp</span>
-        </a>
-        <a
-          href={siteConfig.links.linkedin}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Open Harshal LinkedIn profile"
-        >
-          <Linkedin className="size-4" />
-          <span>LinkedIn</span>
         </a>
       </aside>
 

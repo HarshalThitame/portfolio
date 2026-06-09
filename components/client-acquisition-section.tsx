@@ -15,7 +15,6 @@ import {
   Gauge,
   Globe2,
   LayoutDashboard,
-  Linkedin,
   Mail,
   MessageCircle,
   MonitorSmartphone,
@@ -716,10 +715,6 @@ export function ClientAcquisitionSection() {
               <AcquisitionButton href={siteConfig.links.whatsapp} variant="secondary" eventSource="inquiry_whatsapp">
                 <MessageCircle className="size-4" />
                 WhatsApp
-              </AcquisitionButton>
-              <AcquisitionButton href={siteConfig.links.linkedin} variant="secondary" eventSource="inquiry_linkedin">
-                <Linkedin className="size-4" />
-                LinkedIn
               </AcquisitionButton>
               <AcquisitionButton href="/#consultation" eventSource="inquiry_schedule_call">
                 Schedule Call

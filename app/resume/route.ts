@@ -15,8 +15,7 @@ Majhi Dairy - Dairy management platform with milk collection tracking, farmer ma
 
 Contact:
 Email: ${siteConfig.email}
-LinkedIn: ${siteConfig.links.linkedin}
-GitHub: ${siteConfig.links.github}
+WhatsApp: ${siteConfig.phoneDisplay}
 Portfolio: ${siteConfig.url}
 `;
 

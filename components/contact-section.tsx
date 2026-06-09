@@ -7,16 +7,12 @@ import {
   Bot,
   Check,
   Code2,
-  FileDown,
-  Github,
   LayoutDashboard,
-  Linkedin,
   Mail,
   MessageCircle,
   MonitorSmartphone,
   Send,
   Sparkles,
-  Twitter,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { loadGsapScrollTrigger, shouldRunDepthMotion, shouldRunScrollMotion } from "@/lib/client-performance";
@@ -63,30 +59,10 @@ const contactMethods: ContactMethod[] = [
   },
   {
     title: "WhatsApp",
-    value: "Start a chat",
+    value: siteConfig.phoneDisplay,
     href: siteConfig.links.whatsapp,
     icon: MessageCircle,
     analyticsEvent: "whatsapp_click",
-  },
-  {
-    title: "LinkedIn",
-    value: "Connect professionally",
-    href: siteConfig.links.linkedin,
-    icon: Linkedin,
-  },
-  {
-    title: "GitHub",
-    value: "View engineering work",
-    href: siteConfig.links.github,
-    icon: Github,
-  },
-  {
-    title: "Resume Download",
-    value: "Download profile",
-    href: siteConfig.links.resume,
-    icon: FileDown,
-    download: true,
-    analyticsEvent: "resume_download",
   },
 ];
 
@@ -99,9 +75,8 @@ const trustItems = [
 ];
 
 const socialLinks = [
-  { label: "GitHub", href: siteConfig.links.github, icon: Github },
-  { label: "LinkedIn", href: siteConfig.links.linkedin, icon: Linkedin },
-  { label: "Twitter/X", href: siteConfig.links.twitter, icon: Twitter },
+  { label: "Email", href: siteConfig.links.email, icon: Mail },
+  { label: "WhatsApp", href: siteConfig.links.whatsapp, icon: MessageCircle, analyticsEvent: "whatsapp_click" as const },
 ];
 
 const contactParticles = [
@@ -703,6 +678,11 @@ export function ContactSection() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={link.label}
+                onClick={() => {
+                  if (link.analyticsEvent) {
+                    trackEvent(link.analyticsEvent, { source: "contact_social", label: link.label });
+                  }
+                }}
                 className="social-orb flex size-12 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/66 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-cyanflare/35 hover:text-cyanflare hover:shadow-[0_0_50px_rgba(97,244,255,0.18)]"
               >
                 <Icon className="size-5" />

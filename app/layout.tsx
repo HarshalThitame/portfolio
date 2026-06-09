@@ -88,7 +88,6 @@ export default function RootLayout({
       jobTitle: siteConfig.role,
       url: siteConfig.url,
       email: siteConfig.email,
-      sameAs: [siteConfig.links.linkedin, siteConfig.links.github, siteConfig.links.twitter],
       knowsAbout: [
         "Next.js",
         "React",
@@ -115,7 +114,6 @@ export default function RootLayout({
         "@type": "Person",
         name: siteConfig.name,
       },
-      sameAs: [siteConfig.links.linkedin, siteConfig.links.github],
     },
     {
       "@context": "https://schema.org",

@@ -28,6 +28,25 @@ export function trackEvent(name: AnalyticsEventName, params: AnalyticsParams = {
   if (typeof window === "undefined") return;
 
   window.gtag?.("event", name, params);
+  const payload = JSON.stringify({
+    type: name,
+    path: window.location.pathname,
+    name,
+    timestamp: new Date().toISOString(),
+    ...params,
+  });
+
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon("/api/monitoring", new Blob([payload], { type: "application/json" }));
+  } else {
+    void fetch("/api/monitoring", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      keepalive: true,
+    });
+  }
+
   window.dispatchEvent(
     new CustomEvent("portfolio:analytics", {
       detail: { name, params },

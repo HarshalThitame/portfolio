@@ -7,18 +7,15 @@ import {
   ArrowUpRight,
   BrainCircuit,
   Code2,
-  Github,
-  Globe2,
   Layers3,
-  Linkedin,
   Mail,
   MapPin,
+  MessageCircle,
   MonitorSmartphone,
   PenLine,
   Rocket,
   ShieldCheck,
   Sparkles,
-  Twitter,
   Workflow,
   Zap,
 } from "lucide-react";
@@ -165,27 +162,6 @@ const values = [
 
 const socialHub = [
   {
-    label: "GitHub",
-    href: siteConfig.links.github,
-    metric: "Projects",
-    value: "Open work",
-    icon: Github,
-  },
-  {
-    label: "LinkedIn",
-    href: siteConfig.links.linkedin,
-    metric: "Network",
-    value: "Professional",
-    icon: Linkedin,
-  },
-  {
-    label: "Twitter/X",
-    href: siteConfig.links.twitter,
-    metric: "Ideas",
-    value: "Building in public",
-    icon: Twitter,
-  },
-  {
     label: "Email",
     href: siteConfig.links.email,
     metric: "Contact",
@@ -193,11 +169,11 @@ const socialHub = [
     icon: Mail,
   },
   {
-    label: "Portfolio",
-    href: siteConfig.url,
-    metric: "Home",
-    value: "Personal brand",
-    icon: Globe2,
+    label: "WhatsApp",
+    href: siteConfig.links.whatsapp,
+    metric: "Chat",
+    value: siteConfig.phoneDisplay,
+    icon: MessageCircle,
   },
 ];
 

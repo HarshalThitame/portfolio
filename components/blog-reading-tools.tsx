@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy, Linkedin, Share2, Twitter } from "lucide-react";
+import { Check, Copy, Mail, MessageCircle, Share2 } from "lucide-react";
 
 export function ReadingProgress() {
   const progressRef = useRef<HTMLSpanElement | null>(null);
@@ -57,20 +57,18 @@ export function ShareButtons({ title, url }: { title: string; url: string }) {
   return (
     <div className="article-share" aria-label="Share article">
       <a
-        href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`}
+        href={`https://wa.me/?text=${encodedTitle}%20${encodedUrl}`}
         target="_blank"
         rel="noreferrer"
-        aria-label="Share on LinkedIn"
+        aria-label="Share on WhatsApp"
       >
-        <Linkedin className="size-4" />
+        <MessageCircle className="size-4" />
       </a>
       <a
-        href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`}
-        target="_blank"
-        rel="noreferrer"
-        aria-label="Share on X"
+        href={`mailto:?subject=${encodedTitle}&body=${encodedUrl}`}
+        aria-label="Share by email"
       >
-        <Twitter className="size-4" />
+        <Mail className="size-4" />
       </a>
       <button type="button" onClick={copyLink} aria-label="Copy article link">
         {copied ? <Check className="size-4" /> : <Copy className="size-4" />}

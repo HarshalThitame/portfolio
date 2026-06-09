@@ -13,7 +13,6 @@ import {
   Globe2,
   Layers3,
   LayoutDashboard,
-  Linkedin,
   Mail,
   MessageCircle,
   Rocket,
@@ -561,9 +560,9 @@ export function StudioPage() {
                 <Mail className="size-4" />
                 Email
               </a>
-              <a href={siteConfig.links.linkedin} target="_blank" rel="noreferrer">
-                <Linkedin className="size-4" />
-                LinkedIn
+              <a href={siteConfig.links.whatsapp} target="_blank" rel="noreferrer">
+                <MessageCircle className="size-4" />
+                WhatsApp
               </a>
             </div>
           </div>
