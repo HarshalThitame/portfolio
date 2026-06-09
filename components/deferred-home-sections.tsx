@@ -1,33 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { SectionSkeleton } from "@/components/skeletons";
-import { getClientPerformanceTier } from "@/lib/client-performance";
 
-type IdleWindow = Window & {
-  requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
-  cancelIdleCallback?: (handle: number) => void;
-};
-
-const hydrationDelays: Record<string, number> = {
-  about: 320,
-  "featured-projects": 1100,
-  services: 1900,
-  "client-acquisition": 2800,
-  consultation: 3700,
-  "personal-brand": 4600,
-  labs: 5600,
-  contact: 6600,
-};
-
-function getHydrationDelay(sectionId: string) {
-  const tier = getClientPerformanceTier();
-  const multiplier = tier === "full" ? 1 : tier === "balanced" ? 1.45 : 2.1;
-
-  return Math.round((hydrationDelays[sectionId] ?? 1800) * multiplier);
-}
+const emptyAliases: string[] = [];
 
 const AboutSection = dynamic(
   () => import("@/components/about-section").then((module) => module.AboutSection),
@@ -64,27 +42,31 @@ const ContactSection = dynamic(
 
 function DeferredSection({
   sectionId,
-  aliases = [],
+  aliases = emptyAliases,
   label,
+  forceRender = false,
   children,
 }: {
   sectionId: string;
   aliases?: string[];
   label: string;
+  forceRender?: boolean;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
+    if (forceRender) {
+      setShouldRender(true);
+      return;
+    }
+
     if (shouldRender) return;
 
     const node = ref.current;
     if (!node) return;
 
-    const idleWindow = window as IdleWindow;
-    let delayTimer = 0;
-    let idleHandle = 0;
     let rendered = false;
 
     const renderSection = (activeObserver?: IntersectionObserver) => {
@@ -94,10 +76,18 @@ function DeferredSection({
       activeObserver?.disconnect();
     };
 
-    if (typeof IntersectionObserver === "undefined") {
-      const delay = window.setTimeout(() => renderSection(), getHydrationDelay(sectionId));
+    const sectionTargets = [sectionId, ...aliases].map((id) => `#${id}`);
+    if (sectionTargets.includes(window.location.hash)) {
+      renderSection();
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => node.scrollIntoView({ block: "start" }));
+      });
+      return;
+    }
 
-      return () => window.clearTimeout(delay);
+    if (typeof IntersectionObserver === "undefined") {
+      renderSection();
+      return;
     }
 
     const observer = new IntersectionObserver(
@@ -105,28 +95,15 @@ function DeferredSection({
         if (!entry?.isIntersecting) return;
         renderSection(observer);
       },
-      { rootMargin: "900px 0px 700px 0px" },
+      { rootMargin: "240px 0px -18% 0px" },
     );
 
     observer.observe(node);
 
-    delayTimer = window.setTimeout(() => {
-      if (rendered) return;
-
-      if (idleWindow.requestIdleCallback) {
-        idleHandle = idleWindow.requestIdleCallback(() => renderSection(), { timeout: 1600 });
-        return;
-      }
-
-      renderSection();
-    }, getHydrationDelay(sectionId));
-
     return () => {
       observer?.disconnect();
-      window.clearTimeout(delayTimer);
-      if (idleHandle && idleWindow.cancelIdleCallback) idleWindow.cancelIdleCallback(idleHandle);
     };
-  }, [sectionId, shouldRender]);
+  }, [aliases, forceRender, sectionId, shouldRender]);
 
   return (
     <div
@@ -144,32 +121,54 @@ function DeferredSection({
 }
 
 export function DeferredHomeSections() {
+  const sections = useMemo(() => [
+    { sectionId: "about", label: "Loading about section", children: <AboutSection /> },
+    { sectionId: "featured-projects", label: "Loading projects section", children: <ProjectsSection /> },
+    { sectionId: "services", label: "Loading services section", children: <ServicesSection /> },
+    { sectionId: "client-acquisition", label: "Loading client acquisition section", children: <ClientAcquisitionSection /> },
+    { sectionId: "consultation", label: "Loading consultation section", children: <ConversionSection /> },
+    { sectionId: "personal-brand", label: "Loading personal brand section", children: <PersonalBrandSection /> },
+    { sectionId: "labs", label: "Loading labs section", children: <LabsSection /> },
+    { sectionId: "contact", aliases: ["contact-form"], label: "Loading contact section", children: <ContactSection /> },
+  ], []);
+  const [forcedIndex, setForcedIndex] = useState(-1);
+
+  useEffect(() => {
+    const updateHashTarget = () => {
+      const hash = window.location.hash.slice(1);
+      if (!hash) {
+        setForcedIndex(-1);
+        return;
+      }
+
+      const nextIndex = sections.findIndex((section) => section.sectionId === hash || section.aliases?.includes(hash));
+      setForcedIndex(nextIndex);
+
+      if (nextIndex >= 0) {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView({ block: "start" }));
+        });
+      }
+    };
+
+    updateHashTarget();
+    window.addEventListener("hashchange", updateHashTarget);
+    return () => window.removeEventListener("hashchange", updateHashTarget);
+  }, [sections]);
+
   return (
     <>
-      <DeferredSection sectionId="about" label="Loading about section">
-        <AboutSection />
-      </DeferredSection>
-      <DeferredSection sectionId="featured-projects" label="Loading projects section">
-        <ProjectsSection />
-      </DeferredSection>
-      <DeferredSection sectionId="services" label="Loading services section">
-        <ServicesSection />
-      </DeferredSection>
-      <DeferredSection sectionId="client-acquisition" label="Loading client acquisition section">
-        <ClientAcquisitionSection />
-      </DeferredSection>
-      <DeferredSection sectionId="consultation" label="Loading consultation section">
-        <ConversionSection />
-      </DeferredSection>
-      <DeferredSection sectionId="personal-brand" label="Loading personal brand section">
-        <PersonalBrandSection />
-      </DeferredSection>
-      <DeferredSection sectionId="labs" label="Loading labs section">
-        <LabsSection />
-      </DeferredSection>
-      <DeferredSection sectionId="contact" aliases={["contact-form"]} label="Loading contact section">
-        <ContactSection />
-      </DeferredSection>
+      {sections.map((section, index) => (
+        <DeferredSection
+          key={section.sectionId}
+          sectionId={section.sectionId}
+          aliases={section.aliases}
+          label={section.label}
+          forceRender={forcedIndex >= index}
+        >
+          {section.children}
+        </DeferredSection>
+      ))}
     </>
   );
 }

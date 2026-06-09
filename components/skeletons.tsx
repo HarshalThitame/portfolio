@@ -2,16 +2,7 @@ export function SectionSkeleton({ label = "Loading section" }: { label?: string 
   return (
     <section className="section-skeleton" aria-label={label} aria-busy="true">
       <div className="section-skeleton-inner">
-        <div className="skeleton-pill" />
-        <div className="skeleton-title">
-          <span />
-          <span />
-        </div>
-        <div className="skeleton-grid">
-          <span />
-          <span />
-          <span />
-        </div>
+        <div className="skeleton-title" />
       </div>
     </section>
   );

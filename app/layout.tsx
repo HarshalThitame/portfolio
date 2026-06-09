@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@/components/analytics";
-import { PerformanceMonitor } from "@/components/performance-monitor";
-import { SiteExperience } from "@/components/site-experience";
+import { DeferredSiteExperience } from "@/components/deferred-site-experience";
+import { StaticSiteChrome } from "@/components/static-site-chrome";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
@@ -138,7 +138,7 @@ export default function RootLayout({
   ];
 
   return (
-    <html lang="en" className={`${geist.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en" data-performance="balanced" className={`${geist.variable} ${spaceGrotesk.variable}`}>
       <body>
         <script
           type="application/ld+json"
@@ -146,8 +146,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <Analytics />
-        <PerformanceMonitor />
-        <SiteExperience />
+        <StaticSiteChrome />
+        <DeferredSiteExperience />
         {children}
       </body>
     </html>

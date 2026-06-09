@@ -8,10 +8,25 @@ const googleAnalyticsId = process.env.NEXT_PUBLIC_GA_ID;
 
 export function Analytics() {
   useEffect(() => {
-    trackEvent("portfolio_visit", {
-      page_path: window.location.pathname,
-      page_title: document.title,
-    });
+    const idleWindow = window as typeof window & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    const sendVisitEvent = () => {
+      trackEvent("portfolio_visit", {
+        page_path: window.location.pathname,
+        page_title: document.title,
+      });
+    };
+
+    const idleHandle = idleWindow.requestIdleCallback?.(sendVisitEvent, { timeout: 6000 });
+    const timer = idleHandle ? 0 : window.setTimeout(sendVisitEvent, 3500);
+
+    return () => {
+      if (idleHandle) idleWindow.cancelIdleCallback?.(idleHandle);
+      if (timer) window.clearTimeout(timer);
+    };
   }, []);
 
   if (!googleAnalyticsId) return null;

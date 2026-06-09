@@ -17,11 +17,8 @@ import {
   Smartphone,
   Zap,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { loadGsapScrollTrigger, shouldRunDepthMotion, shouldRunScrollMotion } from "@/lib/client-performance";
 import { trackEvent } from "@/lib/analytics";
-
-const premiumEase = [0.16, 1, 0.3, 1] as const;
 
 type Project = {
   id: "flux3d" | "majhi-dairy";
@@ -193,10 +190,8 @@ function ProjectButton({
 function FluxMockup() {
   return (
     <div className="mockup-stage flux-stage">
-      <motion.div
+      <div
         className="device-mockup desktop-mockup project-depth"
-        whileHover={{ scale: 1.025, rotateX: 1.5, rotateY: -2 }}
-        transition={{ duration: 0.5, ease: premiumEase }}
       >
         <div className="browser-bar">
           <span />
@@ -246,36 +241,30 @@ function FluxMockup() {
             <span>ABS</span>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className="flux-status-card flux-quote-card project-depth"
-        animate={{ y: [8, -9, 8], rotate: [-1.2, 1.4, -1.2] }}
-        transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
       >
         <PackageCheck className="size-5 text-cyanflare" />
         <div>
           <span>Instant RFQ</span>
           <strong>Manufacturing ready</strong>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className="flux-status-card flux-tolerance-card project-depth"
-        animate={{ y: [-7, 8, -7], rotate: [1, -1.5, 1] }}
-        transition={{ duration: 9.2, repeat: Infinity, ease: "easeInOut" }}
       >
         <Gauge className="size-5 text-rosegold" />
         <div>
           <span>Tolerance</span>
           <strong>0.2mm detail</strong>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className="device-mockup tablet-mockup project-depth"
-        animate={{ y: [-10, 10, -10] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       >
         <div className="tablet-content">
           <PackageCheck className="size-7 text-cyanflare" />
@@ -287,12 +276,10 @@ function FluxMockup() {
             <i />
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className="device-mockup phone-mockup project-depth"
-        animate={{ y: [10, -12, 10] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
       >
         <div className="phone-notch" />
         <div className="phone-flux">
@@ -304,7 +291,7 @@ function FluxMockup() {
             <i />
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -312,10 +299,8 @@ function FluxMockup() {
 function DairyMockup() {
   return (
     <div className="mockup-stage dairy-stage">
-      <motion.div
+      <div
         className="device-mockup dashboard-mockup project-depth"
-        whileHover={{ scale: 1.025, rotateX: 1.5, rotateY: 2 }}
-        transition={{ duration: 0.5, ease: premiumEase }}
       >
         <div className="dashboard-top">
           <div>
@@ -372,12 +357,10 @@ function DairyMockup() {
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className="device-mockup dairy-phone project-depth"
-        animate={{ y: [-8, 12, -8] }}
-        transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut" }}
       >
         <div className="phone-notch" />
         <div className="dairy-mobile-content">
@@ -394,16 +377,14 @@ function DairyMockup() {
             <small>Fat 4.2</small>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className="floating-analytics project-depth"
-        animate={{ y: [8, -10, 8], rotate: [-1, 1.5, -1] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
       >
         <BarChart3 className="size-5 text-cyanflare" />
         <span>Payment & report synced</span>
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -419,18 +400,15 @@ function ProjectVisual({ project }: { project: Project }) {
           const Icon = metric.icon;
 
           return (
-            <motion.div
+            <div
               key={metric.label}
               className="project-metric-card"
-              initial={{ opacity: 0, y: 18, scale: 0.94 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ delay: index * 0.08, duration: 0.68, ease: premiumEase }}
+              style={{ animationDelay: `${180 + index * 80}ms` } as CSSProperties}
             >
               <Icon className="size-4 text-cyanflare" />
               <strong>{metric.value}</strong>
               <span>{metric.label}</span>
-            </motion.div>
+            </div>
           );
         })}
       </div>
@@ -445,22 +423,14 @@ function ProjectCase({ project, index }: { project: Project; index: number }) {
     >
       <div aria-hidden="true" className="project-case-light" />
 
-      <motion.div
+      <div
         className={`project-visual order-1 ${project.reverse ? "lg:order-2" : "lg:order-1"}`}
-        initial={{ opacity: 0, y: 42 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-110px" }}
-        transition={{ delay: 0.1, duration: 0.95, ease: premiumEase }}
       >
         <ProjectVisual project={project} />
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className={`project-copy order-2 relative z-10 ${project.reverse ? "lg:order-1" : "lg:order-2"}`}
-        initial={{ opacity: 0, y: 32 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-110px" }}
-        transition={{ delay: 0.18, duration: 0.9, ease: premiumEase }}
       >
         <p className="mb-5 inline-flex rounded-full border border-white/10 bg-white/[0.055] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-cyanflare/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-xl">
           {project.eyebrow}
@@ -531,7 +501,7 @@ function ProjectCase({ project, index }: { project: Project; index: number }) {
         <div className="mt-8 text-xs font-bold uppercase tracking-[0.2em] text-white/28">
           Case Study {String(index + 1).padStart(2, "0")}
         </div>
-      </motion.div>
+      </div>
     </article>
   );
 }

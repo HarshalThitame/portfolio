@@ -11,15 +11,14 @@ export function getClientPerformanceTier(): PerformanceTier {
 export function shouldRunScrollMotion() {
   if (typeof window === "undefined") return false;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-  if (window.innerWidth < 900) return false;
-  return getClientPerformanceTier() !== "lite";
+  return getClientPerformanceTier() === "full" && window.innerWidth >= 1200;
 }
 
 export function shouldRunDepthMotion() {
   if (typeof window === "undefined") return false;
   if (!shouldRunScrollMotion()) return false;
   if (!window.matchMedia("(pointer: fine)").matches) return false;
-  return getClientPerformanceTier() === "full" && window.innerWidth >= 1100;
+  return getClientPerformanceTier() === "full" && window.innerWidth >= 1200;
 }
 
 export async function loadGsapScrollTrigger() {

@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ArrowDown, ArrowUpRight, MessageCircle } from "lucide-react";
 
 type MagneticButtonProps = {
@@ -8,24 +8,8 @@ type MagneticButtonProps = {
 };
 
 const headlineLines = ["BUILDING DIGITAL", "PRODUCTS THAT", "PEOPLE LOVE TO USE"];
+const mobileHeadlineLines = ["BUILDING", "DIGITAL", "PRODUCTS", "THAT PEOPLE", "LOVE TO USE"];
 const headlineLabel = headlineLines.join(" ");
-
-const particles = [
-  { left: 7, top: 18, size: 2, delay: "-1s", duration: "7s", dx: "28px", dy: "-34px" },
-  { left: 16, top: 73, size: 3, delay: "-4s", duration: "9s", dx: "-24px", dy: "38px" },
-  { left: 28, top: 28, size: 2, delay: "-2s", duration: "8s", dx: "18px", dy: "-28px" },
-  { left: 37, top: 84, size: 2, delay: "-5s", duration: "10s", dx: "-28px", dy: "20px" },
-  { left: 49, top: 14, size: 3, delay: "-6s", duration: "11s", dx: "32px", dy: "42px" },
-  { left: 58, top: 64, size: 2, delay: "-3s", duration: "8s", dx: "-18px", dy: "-36px" },
-  { left: 68, top: 26, size: 2, delay: "-7s", duration: "12s", dx: "22px", dy: "-26px" },
-  { left: 76, top: 79, size: 3, delay: "-1s", duration: "9s", dx: "-34px", dy: "24px" },
-  { left: 88, top: 20, size: 2, delay: "-5s", duration: "10s", dx: "-20px", dy: "-30px" },
-  { left: 93, top: 57, size: 2, delay: "-8s", duration: "12s", dx: "18px", dy: "35px" },
-  { left: 12, top: 46, size: 1, delay: "-3s", duration: "8s", dx: "30px", dy: "18px" },
-  { left: 44, top: 48, size: 1, delay: "-9s", duration: "13s", dx: "-22px", dy: "32px" },
-  { left: 83, top: 42, size: 1, delay: "-4s", duration: "9s", dx: "24px", dy: "-25px" },
-  { left: 62, top: 88, size: 1, delay: "-2s", duration: "7s", dx: "-18px", dy: "-28px" },
-];
 
 const heroMetrics = [
   "Product-grade UI",
@@ -94,37 +78,12 @@ export function PremiumHero() {
       <div aria-hidden="true" className="grid-layer absolute inset-x-[-16%] bottom-[-24%] h-[74vh]" />
       <div aria-hidden="true" className="spotlight-layer pointer-events-none absolute inset-0" />
       <div aria-hidden="true" className="hero-volumetric-light pointer-events-none absolute inset-0" />
-      <div
-        aria-hidden="true"
-        className="pointer-follower pointer-events-none absolute z-[4] hidden size-52 rounded-full lg:block"
-      />
       <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.08),transparent_38%),linear-gradient(to_bottom,rgba(4,5,10,0.04),rgba(4,5,10,0.78))]" />
       <div aria-hidden="true" className="fine-noise pointer-events-none absolute inset-0" />
 
-      <div aria-hidden="true" className="absolute inset-0">
-        {particles.map((particle) => (
-          <span
-            key={`${particle.left}-${particle.top}`}
-            className="particle absolute rounded-full bg-cyanflare shadow-[0_0_18px_rgba(97,244,255,0.55)]"
-            style={
-              {
-                left: `${particle.left}%`,
-                top: `${particle.top}%`,
-                width: `${particle.size}px`,
-                height: `${particle.size}px`,
-                "--delay": particle.delay,
-                "--duration": particle.duration,
-                "--drift-x": particle.dx,
-                "--drift-y": particle.dy,
-              } as CSSProperties
-            }
-          />
-        ))}
-      </div>
-
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] items-center justify-center px-5 py-24 sm:px-8 lg:px-12 xl:px-16">
         <div
-          className="hero-content relative z-20 mx-auto flex max-w-[86rem] flex-col items-center text-center"
+          className="hero-content relative z-20 mx-auto flex w-full min-w-0 max-w-[86rem] flex-col items-center text-center"
         >
           <div
             className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/12 bg-white/[0.055] px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.28em] text-frost/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_0_44px_rgba(97,244,255,0.12)] backdrop-blur-2xl sm:text-xs"
@@ -137,35 +96,33 @@ export function PremiumHero() {
           </div>
 
           <h1
-            className="font-display text-[1.78rem] font-black uppercase leading-[0.84] tracking-normal min-[360px]:text-[2.04rem] min-[420px]:text-[2.4rem] sm:text-[3.45rem] md:text-[4.45rem] lg:text-[5.6rem] xl:text-[7rem] 2xl:text-[8.2rem]"
+            className="max-w-full font-display text-[2.05rem] font-black uppercase leading-[0.84] tracking-normal min-[360px]:text-[2.28rem] min-[420px]:text-[2.58rem] sm:text-[3.45rem] md:text-[4.45rem] lg:text-[5.6rem] xl:text-[7rem] 2xl:text-[8.2rem]"
             aria-label={headlineLabel}
           >
-            {headlineLines.map((line, lineIndex) => (
-              <span
-                key={line}
-                className={`block overflow-hidden pb-[0.05em] ${lineIndex === 2 ? "headline-accent" : "headline-gradient"}`}
-                aria-hidden="true"
-              >
-                {line.split("").map((character, characterIndex) => (
-                  <span
-                    key={`${line}-${characterIndex}`}
-                    className="inline-block will-change-transform"
-                    data-char=""
-                    style={
-                      {
-                        "--char-delay": `${260 + lineIndex * 120 + characterIndex * 14}ms`,
-                      } as CSSProperties
-                    }
-                  >
-                    {character === " " ? "\u00A0" : character}
-                  </span>
-                ))}
-              </span>
-            ))}
+            <span className="block sm:hidden" aria-hidden="true">
+              {mobileHeadlineLines.map((line, lineIndex) => (
+                <span
+                  key={line}
+                  className={`headline-line block overflow-hidden pb-[0.05em] ${lineIndex >= 2 ? "headline-accent" : "headline-gradient"}`}
+                >
+                  <span>{line}</span>
+                </span>
+              ))}
+            </span>
+            <span className="hidden sm:block" aria-hidden="true">
+              {headlineLines.map((line, lineIndex) => (
+                <span
+                  key={line}
+                  className={`headline-line block overflow-hidden pb-[0.05em] ${lineIndex === 2 ? "headline-accent" : "headline-gradient"}`}
+                >
+                  <span>{line}</span>
+                </span>
+              ))}
+            </span>
           </h1>
 
           <p
-            className="mt-8 max-w-2xl text-balance text-base leading-8 text-frost/78 sm:text-lg lg:text-xl"
+            className="mt-8 max-w-[20rem] text-balance text-base leading-8 text-frost/78 sm:max-w-2xl sm:text-lg lg:text-xl"
           >
             Full Stack Developer focused on building modern web applications,
             AI-powered solutions and exceptional user experiences.
